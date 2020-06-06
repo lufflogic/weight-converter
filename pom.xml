@@ -24,6 +24,18 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <mainClass>com.fluffy.luffs.weight.converter.WeightConverter</mainClass>
     </properties>
+    
+    <scm>
+        <connection>scm:git:https://github.com/cbm64chris/${project.artifactId}.git</connection>
+        <developerConnection>scm:git:https://github.com/cbm64chris/${project.artifactId}.git</developerConnection>
+        <tag>HEAD</tag>
+        <url>https://github.com/cbm64chris/${project.artifactId}</url>
+    </scm>
+    
+    <issueManagement>
+        <system>git</system>
+        <url>https://github.com/cbm64chris/${project.artifactId}/issues</url>
+    </issueManagement>
 
     <ciManagement>
         <system>travis</system>
@@ -68,6 +80,11 @@
                 <configuration>
                     <mainClass>${mainClass}</mainClass>
                 </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-release-plugin</artifactId>
+                <version>2.5.3</version>
             </plugin>
         </plugins>
     </build>
