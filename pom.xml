@@ -5,12 +5,18 @@
     <artifactId>weight-converter</artifactId>
     <version>1.0.0-SNAPSHOT</version>
     <packaging>jar</packaging>
+    
     <name>WeightConverter</name>
+    
+    <developers>
+        <developer>
+            <name>Chris Luff</name>
+        </developer>
+    </developers>
     
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <mainClass>com.fluffy.luffs.weight.converter.WeightConverter</mainClass>
-        <attach.version>4.0.7</attach.version>
     </properties>
     
     <build>
