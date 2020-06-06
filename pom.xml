@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>com.fluffy.luffs</groupId>
+    <artifactId>weight-converter</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
+    <packaging>jar</packaging>
+    <name>WeightConverter</name>
+    
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <mainClass>com.fluffy.luffs.weight.converter.WeightConverter</mainClass>
+        <attach.version>4.0.7</attach.version>
+    </properties>
+    
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.8.0</version>
+                <configuration>
+                    <release>11</release>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>com.gluonhq</groupId>
+                <artifactId>client-maven-plugin</artifactId>
+                <version>0.1.26</version>
+                <configuration>
+                    <reflectionList>
+                        <list>com.fluffy.luffs.weight.converter.WeightConverterController</list>
+                        <list>javafx.geometry.Insets</list>
+                        <list>javafx.scene.control.Label</list>
+                        <list>javafx.scene.control.TextField</list>
+                        <list>javafx.scene.text.Font</list>
+                        <list>javafx.scene.control.ChoiceBox</list>
+                        <list>javafx.fxml.FXMLLoader</list>
+                    </reflectionList>
+  
+                    <target>${build.target}</target>
+                    <graalvmHome>/Library/Java/JavaVirtualMachines/GraalVM.20.1.0-ea+28</graalvmHome>
+                    <mainClass>${mainClass}</mainClass>
+                    <verbose>true</verbose>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.openjfx</groupId>
+                <artifactId>javafx-maven-plugin</artifactId>
+                <version>0.0.4</version>
+                <configuration>
+                    <mainClass>${mainClass}</mainClass>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+    
+    <dependencies>
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-base</artifactId>
+            <version>14.0.1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-controls</artifactId>
+            <version>14.0.1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-graphics</artifactId>
+            <version>14.0.1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-fxml</artifactId>
+            <version>14.0.1</version>
+        </dependency>
+    </dependencies>
+    
+    <profiles>
+        <profile>
+            <id>ios</id>
+            <properties>
+                <attach.classifier>ios</attach.classifier>
+                <build.target>ios</build.target>
+            </properties>
+        </profile>
+        <profile>
+            <id>desktop</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <properties>
+                <attach.classifier>desktop</attach.classifier>
+                <build.target>host</build.target>
+            </properties>
+        </profile>
+    </profiles>
+    
+    <repositories>
+        <repository>
+            <id>Gluon</id>
+            <url>https://nexus.gluonhq.com/nexus/content/repositories/releases</url>
+        </repository>
+    </repositories>
+    
+    <pluginRepositories>
+        <pluginRepository>
+            <id>gluon-releases</id>
+            <url>http://nexus.gluonhq.com/nexus/content/repositories/releases/</url>
+        </pluginRepository>
+    </pluginRepositories>
+    
+</project>

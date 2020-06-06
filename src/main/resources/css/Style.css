@@ -1,0 +1,40 @@
+
+
+.text-field {
+    -fx-display-caret: false;
+    -fx-background-color: -fx-text-box-border, -fx-background ;
+    -fx-background-insets: 0, 0 0 1 0 ;
+    -fx-background-radius: 0 ;
+    -fx-font-size: 40px ;
+    -fx-text-fill: #666666;
+    -fx-text-alignment: center;
+}
+
+.choice-box {
+    -fx-background-color: -fx-text-box-border, -fx-background ;
+    -fx-background-insets: 0, 0 0 1 0 ;
+    -fx-background-radius: 0 ;
+    -fx-font-size: 20px ;
+    -fx-text-fill: #666666;
+    -fx-text-alignment: center;
+}
+
+.text-field:focused {
+    -fx-background-color: -fx-focus-color, -fx-background ;
+}
+
+.label {
+    -fx-font-size: 40px ;
+    -fx-text-alignment: center;
+    -fx-text-fill: #666666;
+}
+
+.infoLabel {
+    -fx-font-size: 20px ;
+    -fx-text-alignment: center;
+    -fx-text-fill: #666666;
+}
+
+#AnchorPane {
+    -fx-background-color: #e8e8e8;
+}
