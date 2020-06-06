@@ -14,10 +14,21 @@
         </developer>
     </developers>
     
+    <licenses>
+        <license>
+            <name>MIT License</name>
+        </license>
+    </licenses>
+    
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <mainClass>com.fluffy.luffs.weight.converter.WeightConverter</mainClass>
     </properties>
+
+    <ciManagement>
+        <system>travis</system>
+        <url>https://travis-ci.org/github/cbm64chris/weight-converter</url>
+    </ciManagement>
     
     <build>
         <plugins>
