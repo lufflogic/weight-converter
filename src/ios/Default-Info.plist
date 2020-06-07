@@ -5,9 +5,9 @@
 	<key>CFBundleIdentifier</key>
 	<string>com.fluffy.luffs.weight.converter.WeightConverter</string>
 	<key>CFBundleVersion</key>
-	<string>1.0</string>
+	<string>1.0.0</string>
 	<key>CFBundleShortVersionString</key>
-	<string>1.0</string>
+	<string>1.0.0</string>
 	<key>CFBundleExecutable</key>
 	<string>WeightConverter</string>
 	<key>CFBundleIconName</key>
