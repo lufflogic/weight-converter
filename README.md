@@ -5,4 +5,4 @@
 
 ## Introduction
 
-A simple weight conversation application designed to run on macOS and iOS using the Gluon substrate and GraalVM.
+A simple weight conversion application designed to run on macOS and iOS using the Gluon substrate and GraalVM.
