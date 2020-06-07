@@ -1,6 +1,6 @@
 # Weight Converter 
 
-[![Build Status](https://travis-ci.org/cbm64chris/weight-converter.svg?branch=master)](https://travis-ci.org/cbm64chris/weight-converter)
+[![Travis CI](https://api.travis-ci.org/cbm64chris/weight-converter.svg?branch=master)](https://travis-ci.org/cbm64chris/weight-converter)
 
 ## Introduction
 
