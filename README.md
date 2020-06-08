@@ -5,6 +5,6 @@
 
 ## Introduction
 
-A simple weight conversion application designed to run on macOS and iOS using the Gluon substrate and GraalVM.
+A simple weight conversion application designed to run on macOS and iOS using the [Gluon](https://github.com/gluonhq/client-samples) substrate and [GraalVM](https://github.com/oracle/graal).
 
 ![IMG_1209](https://user-images.githubusercontent.com/20171342/84010008-f679e580-a96b-11ea-904f-460e0dd31d60.png)
