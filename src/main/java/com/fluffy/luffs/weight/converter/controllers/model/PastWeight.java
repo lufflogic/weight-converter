@@ -20,28 +20,48 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-*/
+ */
+package com.fluffy.luffs.weight.converter.controllers.model;
 
-module WeightConverter {
-    requires javafx.baseEmpty;
-    requires javafx.base;
-    requires javafx.controlsEmpty;
-    requires javafx.controls;
-    requires javafx.graphicsEmpty;
-    requires javafx.graphics;
-    requires javafx.fxmlEmpty;
-    requires javafx.fxml;
-    
-    requires com.gluonhq.attach.util;
-    requires com.gluonhq.attach.storage;
-    requires com.gluonhq.attach.statusbar;
-    
-    requires java.sql;
-    
-    requires sqljet;
-    requires java.base;
-    
-    opens com.fluffy.luffs.weight.converter.controllers to javafx.fxml;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.TextStyle;
+import java.util.Locale;
 
-    exports com.fluffy.luffs.weight.converter;
+/**
+ *
+ * PastWeight
+ */
+public class PastWeight {
+
+    private final String weight;
+    private final LocalDateTime date;
+    private final long id;
+
+    public PastWeight(long id, String weight, LocalDateTime date) {
+        this.weight = weight;
+        this.date = date;
+        this.id = id;
+    }
+
+    public String getWeight() {
+        return weight;
+    }
+
+    public LocalDateTime getDate() {
+        return date;
+    }
+
+    public String getPastWeightWeekDay() {
+        return date.getDayOfWeek().getDisplayName(TextStyle.SHORT, Locale.getDefault());
+    }
+
+    public String getPastWeightFormattedDate() {
+        return date.format(DateTimeFormatter.ofPattern("dd MMM YYYY"));
+    }
+
+    public long getId() {
+        return id;
+    }
+
 }

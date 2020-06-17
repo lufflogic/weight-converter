@@ -23,6 +23,10 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <mainClass>com.fluffy.luffs.weight.converter.WeightConverter</mainClass>
+        <javafx.version>[14.0,14.1)</javafx.version>
+        <gluon.attach>4.0.8</gluon.attach>
+        <ios.release.providedSigningIdentity/>
+        <ios.release.providedProvisioningProfile/>
     </properties>
     
     <scm>
@@ -55,21 +59,38 @@
             <plugin>
                 <groupId>com.gluonhq</groupId>
                 <artifactId>client-maven-plugin</artifactId>
-                <version>0.1.26</version>
+                <version>0.1.27</version>
                 <configuration>
                     <reflectionList>
-                        <list>com.fluffy.luffs.weight.converter.WeightConverterController</list>
+                        <list>com.fluffy.luffs.weight.converter.controllers.WeightConverterController</list>
                         <list>javafx.geometry.Insets</list>
                         <list>javafx.scene.control.Label</list>
                         <list>javafx.scene.control.TextField</list>
+                        <list>javafx.scene.control.ListView</list>
                         <list>javafx.scene.text.Font</list>
                         <list>javafx.scene.control.ChoiceBox</list>
                         <list>javafx.fxml.FXMLLoader</list>
                     </reflectionList>
-  
+
+                    <attachList>
+                        <list>statusbar</list>
+                        <list>storage</list>
+                        <list>display</list>
+                        <list>lifecycle</list>
+                    </attachList>
+                    
                     <target>${build.target}</target>
-                    <graalvmHome>/Library/Java/JavaVirtualMachines/GraalVM.20.1.0-ea+28</graalvmHome>
+                    <graalvmHome>/Library/Java/JavaVirtualMachines/graalvm-ce-java11-20.2.0-dev/Contents/Home</graalvmHome>
                     <mainClass>${mainClass}</mainClass>
+                    
+                    <releaseConfiguration>      
+                        <bundleName>WeightConverter</bundleName>
+                        <bundleVersion>1.0.0</bundleVersion>
+                        <bundleShortVersion>1.0.0</bundleShortVersion>
+                        <providedSigningIdentity>${ios.release.providedSigningIdentity}</providedSigningIdentity>
+                        <providedProvisioningProfile>${ios.release.providedProvisioningProfile}</providedProvisioningProfile>
+                    </releaseConfiguration>
+
                     <verbose>true</verbose>
                 </configuration>
             </plugin>
@@ -79,7 +100,53 @@
                 <version>0.0.4</version>
                 <configuration>
                     <mainClass>${mainClass}</mainClass>
+                    <options>
+                        <option>--enable-preview</option>
+                    </options>
+                    
                 </configuration>
+                <executions>
+                    <execution>
+                        <!-- Default configuration for running -->
+                        <!-- Usage: mvn clean javafx:run -->
+                        <id>default-cli</id>
+                    </execution>
+                    <execution>
+                        <!-- Configuration for manual attach debugging -->
+                        <!-- Usage: mvn clean javafx:run@debug -->
+                        <id>debug</id>
+                        <configuration>
+                            <options>
+                                <option>--enable-preview</option>
+                                <option>-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=localhost:8000</option>
+                            </options>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <!-- Configuration for automatic IDE debugging -->
+                        <id>ide-debug</id>
+                        <configuration>
+                            <options>
+                                <option>--enable-preview</option>
+                                <option>-agentlib:jdwp=transport=dt_socket,server=n,address=${jpda.address}</option>
+                            </options>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <!-- Configuration for automatic IDE profiling -->
+                        <id>ide-profile</id>
+                        <configuration>
+                            <options>
+                                <option>--enable-preview</option>
+                                <option>${profiler.jvmargs.arg1}</option>
+                                <option>${profiler.jvmargs.arg2}</option>
+                                <option>${profiler.jvmargs.arg3}</option>
+                                <option>${profiler.jvmargs.arg4}</option>
+                                <option>${profiler.jvmargs.arg5}</option>
+                            </options>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -93,22 +160,54 @@
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-base</artifactId>
-            <version>14.0.1</version>
+            <version>${javafx.version}</version>
         </dependency>
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-controls</artifactId>
-            <version>14.0.1</version>
+            <version>${javafx.version}</version>
         </dependency>
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-graphics</artifactId>
-            <version>14.0.1</version>
+            <version>${javafx.version}</version>
         </dependency>
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-fxml</artifactId>
-            <version>14.0.1</version>
+            <version>${javafx.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.gluonhq.attach</groupId>
+            <artifactId>lifecycle</artifactId>
+            <version>${gluon.attach}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.gluonhq.attach</groupId>
+            <artifactId>display</artifactId>
+            <version>${gluon.attach}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.gluonhq.attach</groupId>
+            <artifactId>storage</artifactId>
+            <version>${gluon.attach}</version>
+            <classifier>${attach.classifier}</classifier>
+        </dependency>
+        <dependency>
+            <groupId>com.gluonhq.attach</groupId>
+            <artifactId>util</artifactId>
+            <version>${gluon.attach}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.gluonhq.attach</groupId>
+            <artifactId>statusbar</artifactId>
+            <version>${gluon.attach}</version>
+            <!--<classifier>${attach.classifier}</classifier>-->
+        </dependency>
+        <dependency>
+            <groupId>org.tmatesoft.sqljet</groupId>
+            <artifactId>sqljet</artifactId>
+            <version>1.1.13</version>
         </dependency>
     </dependencies>
     
@@ -118,6 +217,7 @@
             <properties>
                 <attach.classifier>ios</attach.classifier>
                 <build.target>ios</build.target>
+                <sqlite.platform>ios</sqlite.platform>
             </properties>
         </profile>
         <profile>
@@ -128,6 +228,7 @@
             <properties>
                 <attach.classifier>desktop</attach.classifier>
                 <build.target>host</build.target>
+                <sqlite.platform>Mac</sqlite.platform>
             </properties>
         </profile>
     </profiles>

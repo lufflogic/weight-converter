@@ -1,4 +1,45 @@
+/*
+MIT License
 
+Copyright (c) 2020 Chris Luff
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+*/
+
+.deleteButton {
+    -fx-background-color: #ff0033;
+    -fx-text-fill: #ffffff;
+    -fx-font-weight: bold;
+    -fx-font-size: 14px;
+}
+
+.databaseLabel {
+    -fx-font-size: 16px;
+    -fx-alignment: baseline-left;
+    -fx-content-display: bottom;
+    -fx-text-alignment: left;
+    -fx-text-overrun: ellipsis;
+}
+
+#saveWeight {
+    -fx-font-size: 30px ;
+}
 
 .text-field {
     -fx-display-caret: false;
@@ -23,18 +64,48 @@
     -fx-background-color: -fx-focus-color, -fx-background ;
 }
 
-.label {
-    -fx-font-size: 40px ;
+.listHBox {
+    -fx-alignment: center-left;
+}
+
+.infoLabel {
+    -fx-font-size: 20px;
     -fx-text-alignment: center;
     -fx-text-fill: #666666;
 }
 
-.infoLabel {
-    -fx-font-size: 20px ;
-    -fx-text-alignment: center;
+.weightLabel {
+    -fx-font-size: 18px;
+    -fx-pref-width: 110px;
+    -fx-alignment: center-left;
+    -fx-text-fill: #666666;
+}
+
+.dateLabel {
+    -fx-font-size: 18px;
+    -fx-alignment: center-left;
     -fx-text-fill: #666666;
 }
 
 #AnchorPane {
     -fx-background-color: #e8e8e8;
+}
+
+.list-view {
+    -fx-background-color: #e8e8e8;
+    -fx-background-insets: 0,0 0 5 0, 0 0 6 0, 0 0 7 0;
+    -fx-effect: dropshadow( gaussian , lightgray , 30,0,0,1 );
+}
+
+.list-view .scroll-bar:vertical {
+    -fx-opacity: 0;
+    -fx-padding:-10;
+}
+
+.list-view .active {
+    -fx-text-fill: #666666;
+}
+
+.list-view .active:selected {
+    -fx-text-fill: #666666;
 }

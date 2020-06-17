@@ -21,84 +21,17 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
  */
-package com.fluffy.luffs.weight.converter;
 
-import java.util.Optional;
+package com.fluffy.luffs.weight.converter.controllers.model;
+
+import com.fluffy.luffs.weight.converter.Formula;
 import java.util.regex.Pattern;
-import javafx.beans.value.ObservableValue;
-import javafx.fxml.FXML;
-import javafx.scene.control.ChoiceBox;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
-import javafx.scene.control.TextFormatter;
 
 /**
- * WeightConverterController controller containing visual logic.
+ *
+ * Weight
  */
-public class WeightConverterController {
-
-    @FXML
-    private TextField weightValue;
-    @FXML
-    private Label weight;
-    @FXML
-    private ChoiceBox<Weight> convertFromChoice;
-    @FXML
-    private Label infoLabel;
-
-    /**
-     * Initializes the controller class.
-     */
-    public void initialize() {
-
-        convertFromChoice.getItems().addAll(Weight.values());
-        convertFromChoice.getSelectionModel().selectedItemProperty().addListener((ov, t, t1) -> {
-            setInfoLabel(t1.getFullName());
-            Optional.ofNullable(weightValue.getText()).filter(v -> !v.isBlank()).ifPresent(value -> weightValue.setText(t1.convertInput(value)));
-        });
-
-        convertFromChoice.getSelectionModel().select(0);
-
-        weightValue.positionCaret(0);
-        weightValue.setTextFormatter(setTextFormatter());
-
-        weightValue.textProperty().addListener((ObservableValue<? extends String> ov, String t, String t1) -> {
-            if (t1.matches("-?\\d+(\\.\\d+)?")) {
-                weight.setText(convertFromChoice.getSelectionModel().getSelectedItem().getFormulaResult(t1));
-            }
-
-            if (t1.isEmpty()) {
-                resetResult();
-            }
-        });
-
-    }
-
-    private TextFormatter<String> setTextFormatter() {
-        return new TextFormatter<>(change -> Optional.ofNullable(change)
-                .filter(c -> convertFromChoice.getSelectionModel()
-                .getSelectedItem()
-                .getCompilePattern()
-                .matcher(c.getControlNewText()).matches())
-                .get());
-    }
-
-    private void resetResult() {
-        weight.setText("0st 0lbs 0oz");
-    }
-
-    private void setInfoLabel(String value) {
-        String info = new StringBuilder()
-                .append("Weight Converter \n")
-                .append("\n")
-                .append(String.format("Enter the weight in %s \n", value))
-                .append("\n")
-                .toString();
-
-        infoLabel.setText(info);
-    }
-
-    private enum Weight {
+public enum Weight {
 
         KG("Kilograms") {
             @Override
@@ -172,5 +105,3 @@ public class WeightConverterController {
          */
         public abstract String convertInput(String value);
     }
-
-}

@@ -27,7 +27,6 @@ package com.fluffy.luffs.weight.converter.impl;
 import com.fluffy.luffs.weight.converter.Formula;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.function.BiFunction;
 
 /**
  * Formula implementation.
@@ -55,7 +54,7 @@ public class FormulaImpl implements Formula {
         int stones = stonesDecimal.intValue();
         BigDecimal lbsDecimal = stonesDecimal.subtract(new BigDecimal(stones)).multiply(new BigDecimal(STONES_TO_LBS));
         int lbs = lbsDecimal.intValue();
-        int ounces = lbsDecimal.subtract(new BigDecimal(lbs)).multiply(new BigDecimal(LBS_TO_OUNCES)).setScale(0, RoundingMode.HALF_UP).intValue();
+        int ounces = lbsDecimal.subtract(new BigDecimal(lbs)).multiply(new BigDecimal(LBS_TO_OUNCES)).setScale(0, RoundingMode.UP).intValue();
         
         return new StringBuilder().append(stones).append("st ").append(lbs).append("lb ").append(ounces).append("oz").toString();
     }
