@@ -25,6 +25,7 @@
         <mainClass>com.fluffy.luffs.weight.converter.WeightConverter</mainClass>
         <javafx.version>[14.0,14.1)</javafx.version>
         <gluon.attach>4.0.8</gluon.attach>
+        <graalVMVersion>20.3.0-dev</graalVMVersion>
         <ios.release.providedSigningIdentity/>
         <ios.release.providedProvisioningProfile/>
     </properties>
@@ -59,7 +60,7 @@
             <plugin>
                 <groupId>com.gluonhq</groupId>
                 <artifactId>client-maven-plugin</artifactId>
-                <version>0.1.27</version>
+                <version>0.1.28</version>
                 <configuration>
                     <reflectionList>
                         <list>com.fluffy.luffs.weight.converter.controllers.WeightConverterController</list>
@@ -80,7 +81,7 @@
                     </attachList>
                     
                     <target>${build.target}</target>
-                    <graalvmHome>/Library/Java/JavaVirtualMachines/graalvm-ce-java11-20.2.0-dev/Contents/Home</graalvmHome>
+                    <graalvmHome>/Library/Java/JavaVirtualMachines/graalvm-ce-java11-${graalVMVersion}/Contents/Home</graalvmHome>
                     <mainClass>${mainClass}</mainClass>
                     
                     <releaseConfiguration>      

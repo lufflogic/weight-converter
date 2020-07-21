@@ -64,12 +64,9 @@ public class Database {
                     .getAbsolutePath() + "/weightconverter.sqlite");
 
             connection = SqlJetDb.open(dbFile, true);
-            connection.runTransaction(new ISqlJetTransaction() {
-                @Override
-                public Object run(SqlJetDb db) throws SqlJetException {
-                    db.getOptions().setUserVersion(1);
-                    return true;
-                }
+            connection.runTransaction((SqlJetDb db) -> {
+                db.getOptions().setUserVersion(1);
+                return true;
             }, SqlJetTransactionMode.WRITE);
 
             connection.beginTransaction(SqlJetTransactionMode.WRITE);
