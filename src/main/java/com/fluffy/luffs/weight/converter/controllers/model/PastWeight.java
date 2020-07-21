@@ -21,6 +21,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
  */
+
 package com.fluffy.luffs.weight.converter.controllers.model;
 
 import java.time.LocalDateTime;
@@ -38,28 +39,54 @@ public class PastWeight {
     private final LocalDateTime date;
     private final long id;
 
+    /**
+     * Constructor
+     * @param id unique id of the stored weight.
+     * @param weight formatted string of the stored weight.
+     * @param date date of the stored weight.
+     */
     public PastWeight(long id, String weight, LocalDateTime date) {
         this.weight = weight;
         this.date = date;
         this.id = id;
     }
 
+    /**
+     * Get the value of the stored weight.
+     * @return {@link String}
+     */
     public String getWeight() {
         return weight;
     }
 
+    /**
+     * Get the date of the stored weight.
+     * @return {@link LocalDateTime}
+     */
     public LocalDateTime getDate() {
         return date;
     }
 
+    /**
+     * Get the weekday of the stored weight.
+     * @return {@link String}
+     */
     public String getPastWeightWeekDay() {
         return date.getDayOfWeek().getDisplayName(TextStyle.SHORT, Locale.getDefault());
     }
 
+    /**
+     * Get the date of the stored weight in the format dd MMM YYYY.
+     * @return {@link String}
+     */
     public String getPastWeightFormattedDate() {
         return date.format(DateTimeFormatter.ofPattern("dd MMM YYYY"));
     }
 
+    /**
+     * Get the unique id of the stored weight.
+     * @return {@ long}
+     */
     public long getId() {
         return id;
     }
