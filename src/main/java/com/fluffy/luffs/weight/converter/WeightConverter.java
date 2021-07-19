@@ -24,11 +24,22 @@ SOFTWARE.
 
 package com.fluffy.luffs.weight.converter;
 
+import com.almasb.fxgl.animation.Interpolators;
+import com.almasb.fxgl.app.ApplicationMode;
+import com.almasb.fxgl.app.GameApplication;
+import com.almasb.fxgl.app.GameSettings;
+import com.almasb.fxgl.core.math.FXGLMath;
+import com.almasb.fxgl.dsl.FXGL;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Point2D;
 import javafx.scene.Scene;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 
 /**
  * Weight Converter
@@ -42,11 +53,39 @@ public class WeightConverter extends Application {
         AnchorPane root = FXMLLoader.load(this.getClass().getResource("/fxml/Main.fxml"));
         Scene scene = new Scene(root);
 
+        addEasterEggHandler(root);
+
         scene.getStylesheets()
                 .add(this.getClass().getResource("/css/Style.css").toExternalForm());
         stage.setScene(scene);
 
         stage.show();
+    }
+
+    private void addEasterEggHandler(AnchorPane root) {
+        GameApplication.embeddedLaunch(new GameApplication() {
+            @Override
+            protected void initSettings(GameSettings settings) {
+                settings.setApplicationMode(ApplicationMode.RELEASE);
+            }
+        });
+
+        VBox vbox = (VBox) root.getChildren().get(0);
+
+        root.getScene().addEventHandler(KeyEvent.KEY_PRESSED, event -> {
+            if (event.isControlDown() && event.getCode().equals(KeyCode.DIGIT4)) {
+
+                FXGL.animationBuilder()
+                        .duration(Duration.seconds(1))
+                        .interpolator(Interpolators.BOUNCE.EASE_OUT())
+                        .autoReverse(true)
+                        .repeat(2)
+                        .translate(FXGLMath.random(vbox.getChildren()).get())
+                        .from(Point2D.ZERO)
+                        .to(new Point2D(300, 0))
+                        .buildAndPlay();
+            }
+        });
     }
 
     public static void main(String[] args) {

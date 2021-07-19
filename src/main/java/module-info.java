@@ -31,6 +31,8 @@ module WeightConverter {
     requires javafx.graphics;
     requires javafx.fxmlEmpty;
     requires javafx.fxml;
+
+    requires com.almasb.fxgl.all;
     
     requires com.gluonhq.attach.util;
     requires com.gluonhq.attach.storage;
