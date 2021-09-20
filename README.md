@@ -3,6 +3,8 @@
 [![Travis CI](https://api.travis-ci.org/cbm64chris/weight-converter.svg?branch=master)](https://travis-ci.org/cbm64chris/weight-converter)
 ![GitHub](https://img.shields.io/github/license/cbm64chris/weight-converter)
 
+[![WorksWithOpenJDK](https://github.com/foojayio/badges/raw/main/works_with_openjdk/WorksWithOpenJDK-80.png)](https://foojay.io/works-with-openjdk)
+
 ## Introduction
 
 A simple weight conversion application designed to run on macOS and iOS using the [Gluon](https://github.com/gluonhq/client-samples) substrate and [GraalVM](https://github.com/oracle/graal).
