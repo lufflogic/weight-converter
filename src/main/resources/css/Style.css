@@ -74,6 +74,12 @@ SOFTWARE.
     -fx-text-fill: #666666;
 }
 
+.placeholderLabel {
+    -fx-font-size: 14px;
+    -fx-text-alignment: center;
+    -fx-text-fill: #666666;
+}
+
 .weightLabel {
     -fx-font-size: 18px;
     -fx-pref-width: 110px;

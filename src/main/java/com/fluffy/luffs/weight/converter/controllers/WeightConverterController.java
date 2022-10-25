@@ -1,7 +1,7 @@
 /*
 MIT License
 
-Copyright (c) 2020 Chris Luff
+Copyright (c) 2022  Fluffy Luffs
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -26,16 +26,16 @@ package com.fluffy.luffs.weight.converter.controllers;
 import com.fluffy.luffs.weight.converter.controllers.model.Direction;
 import com.fluffy.luffs.weight.converter.controllers.model.PastWeight;
 import com.fluffy.luffs.weight.converter.controllers.model.Weight;
+import com.fluffy.luffs.weight.converter.controllers.model.WeightConverterException;
 import com.fluffy.luffs.weight.converter.controllers.model.WeightListCell;
 import com.fluffy.luffs.weight.converter.storage.Database;
 import com.gluonhq.attach.statusbar.StatusBarService;
+import com.gluonhq.attach.storereview.StoreReviewService;
 import com.gluonhq.attach.util.Platform;
 import com.gluonhq.attach.util.Services;
 import java.io.FileNotFoundException;
 import java.util.Comparator;
 import java.util.Optional;
-import java.util.function.Consumer;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import javafx.animation.Interpolator;
 import javafx.animation.KeyFrame;
@@ -44,6 +44,7 @@ import javafx.animation.Timeline;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.css.CssMetaData;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
@@ -55,142 +56,172 @@ import javafx.scene.layout.HBox;
 import javafx.scene.paint.Color;
 import javafx.util.Duration;
 
-/**
- * WeightConverterController controller containing visual logic.
- */
+/** WeightConverterController controller containing visual logic. */
 public class WeightConverterController {
 
-    @FXML
-    private TextField weightValue;
-    @FXML
-    private Button saveWeight;
-    @FXML
-    private ChoiceBox<Weight> convertFromChoice;
-    @FXML
-    private Label infoLabel;
-    @FXML
-    private ListView<PastWeight> pastWeights;
+  @FXML private TextField weightValue;
+  @FXML private Button saveWeight;
+  @FXML private ChoiceBox<Weight> convertFromChoice;
+  @FXML private Label infoLabel;
+  @FXML private ListView<PastWeight> pastWeights;
 
-    /**
-     * Initializes the controller class.
-     *
-     * @throws java.io.FileNotFoundException
-     */
-    public void initialize() throws FileNotFoundException {
+  /**
+   * Initializes the controller class.
+   *
+   * @throws java.io.FileNotFoundException
+   */
+  public void initialize() throws FileNotFoundException {
 
-        Services.get(StatusBarService.class).ifPresent((StatusBarService t) -> {
-            t.setColor(Color.GRAY);
+    Services.get(StatusBarService.class).ifPresent((StatusBarService t) -> t.setColor(Color.GRAY));
+    Database.createDatabse();
+
+    String placeholderTextString =
+        """
+        Choose the weight to convert to Kilograms or Pounds using the drop down menu
+
+        Enter a weight in numbers only
+
+        Touch the result to save in Stones Pounds and ounces
+
+        Swipe left to remove a saved weight
+        """;
+    Label placeholderLabel = new Label(placeholderTextString);
+    placeholderLabel.setWrapText(true);
+    placeholderLabel.getStyleClass().add("placeholderLabel");
+    placeholderLabel.applyCss();
+
+    pastWeights.setPlaceholder(placeholderLabel);
+    pastWeights.setCellFactory(
+        lv -> {
+          WeightListCell cell = new WeightListCell(pastWeights.getWidth());
+
+          if (Platform.isDesktop()) {
+            cell.setOnMouseClicked(eh -> showDeleteButton(cell));
+          }
+
+          cell.setOnSwipeLeft(eh -> transitionIn(cell));
+          cell.setOnSwipeRight(eh -> transitionOut(cell));
+          return cell;
         });
 
-        pastWeights.setCellFactory(lv -> {
-            WeightListCell cell = new WeightListCell(pastWeights.getWidth());
+    pastWeights.setItems(getPastWeights());
 
-            if (Platform.isDesktop()) {
-                cell.setOnMouseClicked(eh -> showDeleteButton(cell));
-            }
-            
-            cell.setOnSwipeLeft(eh -> transitionIn(cell));
-            cell.setOnSwipeRight(eh -> transitionOut(cell));
-            return cell;
-        });
+    convertFromChoice.getItems().addAll(Weight.values());
+    convertFromChoice
+        .getSelectionModel()
+        .selectedItemProperty()
+        .addListener(
+            (ov, t, t1) -> {
+              setInfoLabel(t1.getFullName());
+              Optional.ofNullable(weightValue.getText())
+                  .filter(v -> !v.isBlank())
+                  .ifPresent(value -> weightValue.setText(t1.convertInput(value)));
+            });
+    convertFromChoice.getSelectionModel().select(0);
 
-        pastWeights.setItems(getPastWeights());
+    weightValue.positionCaret(0);
+    weightValue.setTextFormatter(setTextFormatter());
+    weightValue
+        .textProperty()
+        .addListener(
+            (ObservableValue<? extends String> ov, String t, String t1) ->
+                Optional.ofNullable(t1)
+                    .filter(str -> str.matches("-?\\d+(\\.\\d+)?"))
+                    .ifPresentOrElse(this::setWeightText, this::resetResult));
 
-        convertFromChoice.getItems().addAll(Weight.values());
-        convertFromChoice.getSelectionModel().selectedItemProperty().addListener((ov, t, t1) -> {
-            setInfoLabel(t1.getFullName());
-            Optional.ofNullable(weightValue.getText()).filter(v -> !v.isBlank()).ifPresent(value -> weightValue.setText(t1.convertInput(value)));
-        });
-        convertFromChoice.getSelectionModel().select(0);
+    saveWeight.setOnMouseClicked(eh -> saveNewPastWeight());
+  }
 
-        weightValue.positionCaret(0);
-        weightValue.setTextFormatter(setTextFormatter());
-        weightValue.textProperty().addListener((ObservableValue<? extends String> ov, String t, String t1) -> {
-            Optional.ofNullable(t1).filter(str -> str.matches("-?\\d+(\\.\\d+)?")).ifPresentOrElse(this::setWeightText, () -> resetResult());
-        });
+  private void transitionDeleteButton(Button deleteButton, Direction direction) {
+    Timeline timeline = new Timeline();
+    KeyValue kv =
+        new KeyValue(
+            deleteButton.translateXProperty(),
+            direction.equals(Direction.IN) ? 0 : pastWeights.getWidth(),
+            Interpolator.EASE_OUT);
+    KeyFrame kf = new KeyFrame(Duration.millis(200), kv);
+    timeline.getKeyFrames().add(kf);
+    timeline.play();
+  }
 
-        saveWeight.setOnMouseClicked(eh -> saveNewPastWeight());
+  private void showDeleteButton(WeightListCell cell) {
+    if (getDeleteButton(cell).translateXProperty().get() == pastWeights.getWidth()) {
+      transitionDeleteButton(getDeleteButton(cell), Direction.IN);
+      getDeleteButton(cell).setOnAction(eh -> removePastWeight(cell.getItem().getId()));
+    } else {
+      transitionDeleteButton(getDeleteButton(cell), Direction.OUT);
     }
+  }
 
-    private void transitionDeleteButton(Button deleteButton, Direction direction) {
-        Timeline timeline = new Timeline();
-        KeyValue kv = new KeyValue(deleteButton.translateXProperty(), direction.equals(Direction.IN) ? 0 : pastWeights.getWidth(), Interpolator.EASE_OUT);
-        KeyFrame kf = new KeyFrame(Duration.millis(200), kv);
-        timeline.getKeyFrames().add(kf);
-        timeline.play();
-    }
+  private Button getDeleteButton(WeightListCell cell) {
 
-    private void showDeleteButton(WeightListCell cell) {
-        if (getDeleteButton(cell).translateXProperty().get() == pastWeights.getWidth()) {
-            transitionDeleteButton(getDeleteButton(cell), Direction.IN);
-            getDeleteButton(cell).setOnAction(eh -> removePastWeight(cell.getItem().getId()));
-        } else {
-            transitionDeleteButton(getDeleteButton(cell), Direction.OUT);
-        }
-
-    }
-
-    private Button getDeleteButton(WeightListCell cell) {
- 
-        return Optional.ofNullable(cell).map((WeightListCell t) -> {
-            return Optional.ofNullable(((HBox) t.getGraphic()))
+    return Optional.ofNullable(cell)
+        .map(
+            (WeightListCell t) ->
+                Optional.ofNullable(((HBox) t.getGraphic()))
                     .filter(c -> c.getChildren().size() == 4)
                     .map(l -> (Button) l.getChildren().get(3))
-                    .orElseThrow();
-        }).orElseThrow();
+                    .orElseThrow(
+                        () -> new WeightConverterException("Could not create delete control")))
+        .orElseThrow();
+  }
 
-    }
+  private void transitionIn(WeightListCell cell) {
+    transitionDeleteButton(getDeleteButton(cell), Direction.IN);
+    getDeleteButton(cell).setOnAction(eh -> removePastWeight(cell.getItem().getId()));
+  }
 
-    private void transitionIn(WeightListCell cell) {
-        transitionDeleteButton(getDeleteButton(cell), Direction.IN);
-        getDeleteButton(cell).setOnAction(eh -> removePastWeight(cell.getItem().getId()));
-    }
+  private void transitionOut(WeightListCell cell) {
+    transitionDeleteButton(getDeleteButton(cell), Direction.OUT);
+  }
 
-    private void transitionOut(WeightListCell cell) {
-        transitionDeleteButton(getDeleteButton(cell), Direction.OUT);
-    }
+  private void saveNewPastWeight() {
+    Optional.of(saveWeight.getText())
+        .filter(str -> !str.equals("0st 0lbs 0oz"))
+        .ifPresent(
+            weight -> {
+              Database.setWeight(weight);
+              pastWeights.setItems(getPastWeights());
+            });
+  }
 
-    private void saveNewPastWeight() {
-        Optional.of(saveWeight.getText()).filter(str -> !str.equals("0st 0lbs 0oz")).ifPresent(v -> {
-            Database.setPastWeight(Database::getConnection, v);
-            pastWeights.setItems(getPastWeights());
-        });
-    }
+  public static ObservableList<PastWeight> getPastWeights() {
+    return Database.getPastWeights().stream()
+        .collect(Collectors.toCollection(FXCollections::observableArrayList))
+        .sorted(Comparator.comparing(PastWeight::getDate).reversed());
+  }
 
-    public static ObservableList<PastWeight> getPastWeights() {
-        return Database.getPastWeights(Database::getConnection)
-                .stream().collect(Collectors.toCollection(FXCollections::observableArrayList))
-                .sorted(Comparator.comparing(PastWeight::getDate).reversed());
-    }
+  private void removePastWeight(long id) {
+    Database.deletePastWeight(id);
+    pastWeights.setItems(getPastWeights());
+  }
 
-    private void removePastWeight(long id) {
-        Database.deletePastWeight(Database::getConnection, id);
-        pastWeights.setItems(getPastWeights());
-    }
+  private void setWeightText(String inputString) {
+    saveWeight.setText(
+        convertFromChoice.getSelectionModel().getSelectedItem().getFormulaResult(inputString));
+  }
 
-    private void setWeightText(String inputString) {
-        saveWeight.setText(convertFromChoice.getSelectionModel().getSelectedItem().getFormulaResult(inputString));
-    }
-
-    private TextFormatter<String> setTextFormatter() {
-        return new TextFormatter<>(change -> Optional.ofNullable(change)
-                .filter(c -> convertFromChoice.getSelectionModel()
-                .getSelectedItem()
-                .getCompilePattern()
-                .matcher(c.getControlNewText()).matches())
+  private TextFormatter<String> setTextFormatter() {
+    return new TextFormatter<>(
+        change ->
+            Optional.ofNullable(change)
+                .filter(
+                    c ->
+                        convertFromChoice
+                            .getSelectionModel()
+                            .getSelectedItem()
+                            .getCompilePattern()
+                            .matcher(c.getControlNewText())
+                            .matches())
                 .get());
-    }
+  }
 
-    private void resetResult() {
-        saveWeight.setText("0st 0lbs 0oz");
-    }
+  private void resetResult() {
+    saveWeight.setText("0st 0lbs 0oz");
+  }
 
-    private void setInfoLabel(String value) {
-        String info = new StringBuilder()
-                .append(String.format("Enter the weight in %s \n", value))
-                .toString();
-
-        infoLabel.setText(info);
-
-    }
+  private void setInfoLabel(String value) {
+    infoLabel.setText(String.format("Enter the weight in %s %n", value));
+  }
+  
 }

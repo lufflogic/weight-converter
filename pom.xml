@@ -23,9 +23,9 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <mainClass>com.fluffy.luffs.weight.converter.WeightConverter</mainClass>
-        <javafx.version>[14.0,14.1)</javafx.version>
-        <gluon.attach>4.0.8</gluon.attach>
-        <graalVMVersion>20.3.0-dev</graalVMVersion>
+        <javafx.version>[17.0,18.0)</javafx.version>
+        <gluon.attach>4.0.15</gluon.attach>
+        <graalVMVersion>22.1.0.1-Final</graalVMVersion>
         <ios.release.providedSigningIdentity/>
         <ios.release.providedProvisioningProfile/>
     </properties>
@@ -54,7 +54,7 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.8.0</version>
                 <configuration>
-                    <release>11</release>
+                    <release>17</release>
                 </configuration>
             </plugin>
             <plugin>
@@ -68,8 +68,8 @@
             </plugin>
             <plugin>
                 <groupId>com.gluonhq</groupId>
-                <artifactId>client-maven-plugin</artifactId>
-                <version>0.1.28</version>
+                <artifactId>gluonfx-maven-plugin</artifactId>
+                <version>1.0.15</version>                
                 <configuration>
                     <reflectionList>
                         <list>com.fluffy.luffs.weight.converter.controllers.WeightConverterController</list>
@@ -90,13 +90,13 @@
                     </attachList>
                     
                     <target>${build.target}</target>
-                    <graalvmHome>/Library/Java/JavaVirtualMachines/graalvm-ce-java11-${graalVMVersion}/Contents/Home</graalvmHome>
+                    <graalvmHome>/Library/Java/JavaVirtualMachines/graalvm-svm-java17-darwin-gluon-${graalVMVersion}/Contents/Home</graalvmHome>
                     <mainClass>${mainClass}</mainClass>
                     
                     <releaseConfiguration>      
                         <bundleName>WeightConverter</bundleName>
-                        <bundleVersion>1.0.0</bundleVersion>
-                        <bundleShortVersion>1.0.0</bundleShortVersion>
+                        <bundleVersion>${project.version}</bundleVersion>
+                        <bundleShortVersion>${project.version}</bundleShortVersion>
                         <providedSigningIdentity>${ios.release.providedSigningIdentity}</providedSigningIdentity>
                         <providedProvisioningProfile>${ios.release.providedProvisioningProfile}</providedProvisioningProfile>
                     </releaseConfiguration>
@@ -107,7 +107,7 @@
             <plugin>
                 <groupId>org.openjfx</groupId>
                 <artifactId>javafx-maven-plugin</artifactId>
-                <version>0.0.4</version>
+                <version>0.0.8</version>
                 <configuration>
                     <mainClass>${mainClass}</mainClass>
                     <options>
@@ -158,11 +158,6 @@
                     </execution>
                 </executions>
             </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-release-plugin</artifactId>
-                <version>2.5.3</version>
-            </plugin>
         </plugins>
     </build>
     
@@ -205,6 +200,12 @@
         </dependency>
         <dependency>
             <groupId>com.gluonhq.attach</groupId>
+            <artifactId>store-review</artifactId>
+            <version>${gluon.attach}</version>
+            <classifier>${attach.classifier}</classifier>
+        </dependency>
+        <dependency>
+            <groupId>com.gluonhq.attach</groupId>
             <artifactId>util</artifactId>
             <version>${gluon.attach}</version>
         </dependency>
@@ -212,12 +213,11 @@
             <groupId>com.gluonhq.attach</groupId>
             <artifactId>statusbar</artifactId>
             <version>${gluon.attach}</version>
-            <!--<classifier>${attach.classifier}</classifier>-->
         </dependency>
         <dependency>
-            <groupId>org.tmatesoft.sqljet</groupId>
-            <artifactId>sqljet</artifactId>
-            <version>1.1.13</version>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <version>2.1.214</version>
         </dependency>
     </dependencies>
     
