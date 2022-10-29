@@ -35,6 +35,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -43,6 +45,8 @@ import java.util.List;
 import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 
 /** Database */
 @SuppressWarnings("java:S2115")
@@ -51,10 +55,8 @@ public class Database {
   private static final String JDBC_USER = "SA";
   private static final String JDBC_PWD = "";
 
-  private Database() {}
-
   /** Creates the database if not present */
-  public static void createDatabse() throws FileNotFoundException {
+  public void createDatabse() throws FileNotFoundException {
 
     String schema = "CREATE SCHEMA IF NOT EXISTS WEIGHTCONVERTER";
     String weightTable =
@@ -67,17 +69,6 @@ public class Database {
           );
           """;
 
-    String settingsTable =
-        """
-          CREATE TABLE IF NOT EXISTS WEIGHTCONVERTER.SETTINGS
-          (
-           ID IDENTITY NOT NULL PRIMARY KEY,
-           SETTING_TYPE VARCHAR NOT NULL,
-           SETTING VARCHAR NOT NULL,
-           DT_TM TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
-          );
-        """;
-
     String index =
         "CREATE INDEX IF NOT EXISTS WEIGHTCONVERTER.DT_TM_IDX ON WEIGHTCONVERTER.WEIGHT(DT_TM);";
 
@@ -87,7 +78,6 @@ public class Database {
 
       statement.addBatch(schema);
       statement.addBatch(weightTable);
-      statement.addBatch(settingsTable);
       statement.addBatch(index);
       statement.executeBatch();
 
@@ -96,7 +86,8 @@ public class Database {
     }
   }
 
-  private static String getConnectionString() throws FileNotFoundException {
+  private String getConnectionString() throws FileNotFoundException {
+
     return getStorageType(StorageService::getPrivateStorage)
         .map(path -> "jdbc:h2:" + path + File.separatorChar + "weightconverter")
         .orElseThrow(() -> new FileNotFoundException("Could not access private storage."));
@@ -107,7 +98,7 @@ public class Database {
    *
    * @return Collection of {@link PastWeight}
    */
-  public static Collection<PastWeight> getPastWeights() {
+  public ObservableList<PastWeight> getPastWeights() {
 
     String retrieveWeights =
         """
@@ -127,7 +118,7 @@ public class Database {
       if (execution) {
         ResultSet resultSet = statement.getResultSet();
         if (resultSet.last()) {
-          List<PastWeight> results = new ArrayList<>(resultSet.getRow());
+          ObservableList<PastWeight> results = FXCollections.observableArrayList();
           resultSet.beforeFirst();
 
           while (resultSet.next()) {
@@ -145,7 +136,7 @@ public class Database {
       Logger.getLogger(Database.class.getName()).log(Level.SEVERE, null, ex);
     }
 
-    return Collections.emptyList();
+    return FXCollections.observableArrayList();
   }
 
   /**
@@ -153,13 +144,18 @@ public class Database {
    *
    * @param weight weight
    */
-  public static void setWeight(String weight) {
+  public void setWeight(String weight) {
+
+    setWeight(weight, LocalDateTime.now());
+  }
+
+  public void setWeight(String weight, LocalDateTime dtTm) {
 
     String insertWeight =
         """
         INSERT INTO WEIGHTCONVERTER.WEIGHT
-        (WEIGHT)
-        VALUES (?)
+        (WEIGHT, DT_TM)
+        VALUES (?, ?)
         """;
 
     try (Connection connection =
@@ -167,6 +163,7 @@ public class Database {
         PreparedStatement prepareStatement = connection.prepareStatement(insertWeight)) {
 
       prepareStatement.setString(1, weight);
+      prepareStatement.setTimestamp(2, Timestamp.valueOf(dtTm));
       prepareStatement.executeUpdate();
     } catch (SQLException | FileNotFoundException ex) {
       Logger.getLogger(Database.class.getName()).log(Level.SEVERE, null, ex);
@@ -178,7 +175,7 @@ public class Database {
    *
    * @param id weight unique identifier
    */
-  public static void deletePastWeight(long id) {
+  public void deletePastWeight(long id) {
     String deleteWeight =
         """
         DELETE FROM WEIGHTCONVERTER.WEIGHT W

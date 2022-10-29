@@ -22,7 +22,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
  */
 
-package com.fluffy.luffs.weight.converter;
+package com.fluffy.luffs.weight.converter.controllers;
 
 import com.fluffy.luffs.weight.converter.impl.FormulaImpl;
 

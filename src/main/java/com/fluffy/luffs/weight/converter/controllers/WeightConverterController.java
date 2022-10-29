@@ -29,22 +29,18 @@ import com.fluffy.luffs.weight.converter.controllers.model.Weight;
 import com.fluffy.luffs.weight.converter.controllers.model.WeightConverterException;
 import com.fluffy.luffs.weight.converter.controllers.model.WeightListCell;
 import com.fluffy.luffs.weight.converter.storage.Database;
-import com.gluonhq.attach.statusbar.StatusBarService;
-import com.gluonhq.attach.storereview.StoreReviewService;
+import com.fluffy.luffs.weight.converter.storage.Migration;
+import com.gluonhq.attach.settings.SettingsService;
 import com.gluonhq.attach.util.Platform;
-import com.gluonhq.attach.util.Services;
-import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.Comparator;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import javafx.animation.Interpolator;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
 import javafx.beans.value.ObservableValue;
-import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.css.CssMetaData;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
@@ -53,7 +49,6 @@ import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TextFormatter;
 import javafx.scene.layout.HBox;
-import javafx.scene.paint.Color;
 import javafx.util.Duration;
 
 /** WeightConverterController controller containing visual logic. */
@@ -68,12 +63,8 @@ public class WeightConverterController {
   /**
    * Initializes the controller class.
    *
-   * @throws java.io.FileNotFoundException
    */
-  public void initialize() throws FileNotFoundException {
-
-    Services.get(StatusBarService.class).ifPresent((StatusBarService t) -> t.setColor(Color.GRAY));
-    Database.createDatabse();
+  public void initialize() throws IOException {
 
     String placeholderTextString =
         """
@@ -104,8 +95,6 @@ public class WeightConverterController {
           return cell;
         });
 
-    pastWeights.setItems(getPastWeights());
-
     convertFromChoice.getItems().addAll(Weight.values());
     convertFromChoice
         .getSelectionModel()
@@ -130,6 +119,16 @@ public class WeightConverterController {
                     .ifPresentOrElse(this::setWeightText, this::resetResult));
 
     saveWeight.setOnMouseClicked(eh -> saveNewPastWeight());
+
+    new Database().createDatabse();
+    SettingsService.create()
+        .map(service -> service.retrieve("migration"))
+        .ifPresentOrElse(
+            migration -> pastWeights.setItems(getPastWeights()),
+            () -> {
+              new Migration().doMigration();
+              pastWeights.setItems(getPastWeights());
+            });
   }
 
   private void transitionDeleteButton(Button deleteButton, Direction direction) {
@@ -180,19 +179,19 @@ public class WeightConverterController {
         .filter(str -> !str.equals("0st 0lbs 0oz"))
         .ifPresent(
             weight -> {
-              Database.setWeight(weight);
+              new Database().setWeight(weight);
               pastWeights.setItems(getPastWeights());
             });
   }
 
   public static ObservableList<PastWeight> getPastWeights() {
-    return Database.getPastWeights().stream()
-        .collect(Collectors.toCollection(FXCollections::observableArrayList))
+    return new Database()
+        .getPastWeights()
         .sorted(Comparator.comparing(PastWeight::getDate).reversed());
   }
 
   private void removePastWeight(long id) {
-    Database.deletePastWeight(id);
+    new Database().deletePastWeight(id);
     pastWeights.setItems(getPastWeights());
   }
 
@@ -223,5 +222,4 @@ public class WeightConverterController {
   private void setInfoLabel(String value) {
     infoLabel.setText(String.format("Enter the weight in %s %n", value));
   }
-  
 }

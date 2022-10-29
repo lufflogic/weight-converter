@@ -24,7 +24,7 @@ SOFTWARE.
 
 package com.fluffy.luffs.weight.converter.impl;
 
-import com.fluffy.luffs.weight.converter.Formula;
+import com.fluffy.luffs.weight.converter.controllers.Formula;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 

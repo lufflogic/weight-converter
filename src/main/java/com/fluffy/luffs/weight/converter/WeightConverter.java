@@ -37,20 +37,18 @@ import javafx.stage.Stage;
  */
 public class WeightConverter extends Application {
 
-    @Override
-    public void start(Stage stage) throws Exception {
-        AnchorPane root = FXMLLoader.load(this.getClass().getResource("/fxml/Main.fxml"));
-        Scene scene = new Scene(root);
+  @Override
+  public void start(Stage stage) throws Exception {
+    AnchorPane root = FXMLLoader.load(this.getClass().getResource("/fxml/Main.fxml"));
+    Scene scene = new Scene(root);
 
-        scene.getStylesheets()
-                .add(this.getClass().getResource("/css/Style.css").toExternalForm());
-        stage.setScene(scene);
+    scene.getStylesheets().addAll(this.getClass().getResource("/css/Main.css").toExternalForm());
+    stage.setScene(scene);
 
-        stage.show();
-    }
+    stage.show();
+  }
 
-    public static void main(String[] args) {
-        launch();
-    }
-
+  public static void main(String[] args) {
+    launch();
+  }
 }

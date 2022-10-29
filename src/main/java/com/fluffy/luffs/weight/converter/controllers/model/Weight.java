@@ -24,7 +24,7 @@ SOFTWARE.
 
 package com.fluffy.luffs.weight.converter.controllers.model;
 
-import com.fluffy.luffs.weight.converter.Formula;
+import com.fluffy.luffs.weight.converter.controllers.Formula;
 import java.util.regex.Pattern;
 
 /**
