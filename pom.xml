@@ -23,7 +23,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <mainClass>com.fluffy.luffs.weight.converter.WeightConverter</mainClass>
-        <javafx.version>[17.0,18.0)</javafx.version>
+        <javafx.version>17.0.1</javafx.version>
         <gluon.attach>4.0.15</gluon.attach>
         <graalVMVersion>22.1.0.1-Final</graalVMVersion>
         <ios.release.providedSigningIdentity/>
@@ -52,7 +52,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.8.0</version>
+                <version>3.10.1</version>
                 <configuration>
                     <release>17</release>
                 </configuration>
@@ -60,7 +60,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-release-plugin</artifactId>
-                <version>3.0.0-M1</version>
+                <version>3.0.0-M6</version>
                 <configuration>
                     <pushChanges>false</pushChanges>
                     <tagNameFormat>${project.version}</tagNameFormat>
@@ -81,12 +81,17 @@
                         <list>javafx.scene.control.ChoiceBox</list>
                         <list>javafx.fxml.FXMLLoader</list>
                     </reflectionList>
+                    
+                    <resourcesList>
+                        <list>org.h2.store.fs.disk.FilePathDisk</list>
+                    </resourcesList>
 
                     <attachList>
                         <list>statusbar</list>
                         <list>storage</list>
                         <list>display</list>
                         <list>lifecycle</list>
+                        <list>settings</list>
                     </attachList>
                     
                     <target>${build.target}</target>
@@ -228,7 +233,7 @@
         <dependency>
             <groupId>org.tmatesoft.sqljet</groupId>
             <artifactId>sqljet</artifactId>
-            <version>1.1.13</version>
+            <version>1.1.14</version>
         </dependency>
     </dependencies>
     
@@ -238,7 +243,21 @@
             <properties>
                 <attach.classifier>ios</attach.classifier>
                 <build.target>ios</build.target>
-                <sqlite.platform>ios</sqlite.platform>
+            </properties>
+        </profile>
+        <profile>
+            <id>adndroid</id>
+            <properties>
+                <attach.classifier>android</attach.classifier>
+                <build.target>android</build.target>
+            </properties>
+        </profile>
+        <profile>
+            <id>ios-sim</id>
+            <properties>
+                <attach.classifier>ios</attach.classifier>
+                <build.target>ios-sim</build.target>
+                <simulatorDevice>iPhone 14 Pro Max</simulatorDevice>
             </properties>
         </profile>
         <profile>
@@ -249,7 +268,6 @@
             <properties>
                 <attach.classifier>desktop</attach.classifier>
                 <build.target>host</build.target>
-                <sqlite.platform>Mac</sqlite.platform>
             </properties>
         </profile>
     </profiles>
