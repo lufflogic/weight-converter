@@ -79,13 +79,13 @@
                         <list>javafx.scene.control.ListView</list>
                         <list>javafx.scene.text.Font</list>
                         <list>javafx.scene.control.ChoiceBox</list>
+                        <list>javafx.scene.layout.AnchorPane</list>
+                        <list>javafx.scene.layout.VBox</list>
+                        <list>javafx.scene.control.Button</list>
+                        <list>javafx.geometry.Insets</list>
                         <list>javafx.fxml.FXMLLoader</list>
                     </reflectionList>
                     
-                    <resourcesList>
-                        <list>org.h2.store.fs.disk.FilePathDisk</list>
-                    </resourcesList>
-
                     <attachList>
                         <list>statusbar</list>
                         <list>storage</list>

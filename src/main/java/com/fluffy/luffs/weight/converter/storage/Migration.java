@@ -30,6 +30,7 @@ import com.gluonhq.attach.storage.StorageService;
 import com.gluonhq.attach.util.Services;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.text.MessageFormat;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -54,6 +55,7 @@ public class Migration {
   public void doMigration() {
     try {
       File databaseFile = getDatabaseFile();
+      System.out.println(MessageFormat.format("Reading from {0}", databaseFile.toString()));
       getLegacyWeights(databaseFile)
           .forEach(weight -> new Database().setWeight(weight.getWeight(), weight.getDate()));
       SettingsService.create().ifPresent(service -> service.store("migration", "1"));
