@@ -21,32 +21,25 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
  */
-package com.fluffy.luffs.weight.converter;
+package com.fluffy.luffs.weight.converter.controllers.model;
 
-import com.fluffy.luffs.weight.converter.controllers.WeightConverterController;
-import javafx.application.Application;
-import javafx.scene.Scene;
-import javafx.stage.Stage;
+import javafx.scene.control.ToggleButton;
 
 /**
- * Weight Converter
  *
- * @author chrisluff
+ * WeightConverterToggleButton
  */
-public class WeightConverter extends Application {
+public class WeightConverterToggleButton extends ToggleButton {
 
-    @Override
-    public void start(Stage stage) throws Exception {
-        WeightConverterController weightConverterController = WeightConverterController.create();
-        Scene scene = new Scene(weightConverterController);
+    private final Weight weight;
 
-        scene.getStylesheets().addAll(this.getClass().getResource("/css/Main.css").toExternalForm());
-        stage.setScene(scene);
-
-        stage.show();
+    public WeightConverterToggleButton(Weight weight) {
+        super(weight.getFullName());
+        this.weight = weight;
     }
 
-    public static void main(String[] args) {
-        launch();
+    public Weight getWeight() {
+        return weight;
     }
+
 }

@@ -56,8 +56,11 @@ public class Migration {
     try {
       File databaseFile = getDatabaseFile();
       System.out.println(MessageFormat.format("Reading from {0}", databaseFile.toString()));
-      getLegacyWeights(databaseFile)
-          .forEach(weight -> new Database().setWeight(weight.getWeight(), weight.getDate()));
+      getLegacyWeights(databaseFile).stream()
+          .forEachOrdered(
+              weight ->
+                  new Database()
+                      .setWeight(weight.getWeight(), weight.getKilos(), weight.getDate()));
       SettingsService.create().ifPresent(service -> service.store("migration", "1"));
       databaseFile.deleteOnExit();
     } catch (FileNotFoundException ex) {
@@ -98,6 +101,7 @@ public class Migration {
               new PastWeight(
                   wieghtTablJetCursor.getInteger("id"),
                   wieghtTablJetCursor.getString("weight"),
+                  0.0,
                   LocalDateTime.ofInstant(
                       Instant.ofEpochSecond(wieghtTablJetCursor.getInteger("dt_tm")),
                       ZoneId.systemDefault())));

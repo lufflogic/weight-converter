@@ -29,66 +29,75 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.TextStyle;
 import java.util.Locale;
 
-/**
- *
- * PastWeight
- */
+/** PastWeight */
 public class PastWeight {
 
-    private final String weight;
-    private final LocalDateTime date;
-    private final long id;
+  private final String weight;
+  private final double kilos;
+  private final LocalDateTime date;
+  private final long id;
 
-    /**
-     * Constructor
-     * @param id unique id of the stored weight.
-     * @param weight formatted string of the stored weight.
-     * @param date date of the stored weight.
-     */
-    public PastWeight(long id, String weight, LocalDateTime date) {
-        this.weight = weight;
-        this.date = date;
-        this.id = id;
-    }
+  /**
+   * Constructor
+   *
+   * @param id unique id of the stored weight.
+   * @param weight formatted string of the stored weight.
+   * @param kilos kilograms from the weight entered.
+   * @param date date of the stored weight.
+   */
+  public PastWeight(long id, String weight, double kilos, LocalDateTime date) {
+    this.weight = weight;
+    this.kilos = kilos;
+    this.date = date;
+    this.id = id;
+  }
 
-    /**
-     * Get the value of the stored weight.
-     * @return {@link String}
-     */
-    public String getWeight() {
-        return weight;
-    }
+  /**
+   * Get the value of the stored weight.
+   *
+   * @return {@link String}
+   */
+  public String getWeight() {
+    return weight;
+  }
 
-    /**
-     * Get the date of the stored weight.
-     * @return {@link LocalDateTime}
-     */
-    public LocalDateTime getDate() {
-        return date;
-    }
+  /**
+   * Get the date of the stored weight.
+   *
+   * @return {@link LocalDateTime}
+   */
+  public LocalDateTime getDate() {
+    return date;
+  }
 
-    /**
-     * Get the weekday of the stored weight.
-     * @return {@link String}
-     */
-    public String getPastWeightWeekDay() {
-        return date.getDayOfWeek().getDisplayName(TextStyle.SHORT, Locale.getDefault());
-    }
+  /**
+   * Get the weekday of the stored weight.
+   *
+   * @return {@link String}
+   */
+  public String getPastWeightWeekDay() {
+    return date.getDayOfWeek().getDisplayName(TextStyle.SHORT, Locale.getDefault());
+  }
 
-    /**
-     * Get the date of the stored weight in the format dd MMM YYYY.
-     * @return {@link String}
-     */
-    public String getPastWeightFormattedDate() {
-        return date.format(DateTimeFormatter.ofPattern("dd MMM YYYY"));
-    }
+  /**
+   * Get the date of the stored weight in the format dd MMM YYYY.
+   *
+   * @return {@link String}
+   */
+  public String getPastWeightFormattedDate() {
+    return date.format(DateTimeFormatter.ofPattern("dd MMM YYYY"));
+  }
 
-    /**
-     * Get the unique id of the stored weight.
-     * @return {@ long}
-     */
-    public long getId() {
-        return id;
-    }
+  /**
+   * Get the unique id of the stored weight.
+   *
+   * @return {@ long}
+   */
+  public long getId() {
+    return id;
+  }
 
+  public double getKilos() {
+    return kilos;
+  }
 }

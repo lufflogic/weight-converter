@@ -44,152 +44,183 @@ import java.util.logging.Logger;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
-/** Database */
+/**
+ * Database
+ */
 @SuppressWarnings("java:S2115")
 public class Database {
 
-  private static final String JDBC_USER = "SA";
-  private static final String JDBC_PWD = "";
+    private static final String JDBC_USER = "SA";
+    private static final String JDBC_PWD = "";
 
-  /** Creates the database if not present */
-  public void createDatabse() throws FileNotFoundException {
+    /**
+     * Creates the database if not present
+     * @throws java.io.FileNotFoundException
+     */
+    public void createDatabse() throws FileNotFoundException {
 
-    String schema = "CREATE SCHEMA IF NOT EXISTS WEIGHTCONVERTER";
-    String weightTable =
-        """
+        String schema = "CREATE SCHEMA IF NOT EXISTS WEIGHTCONVERTER";
+        String weightTable
+                = """
           CREATE TABLE IF NOT EXISTS WEIGHTCONVERTER.WEIGHT
           (
            ID IDENTITY NOT NULL PRIMARY KEY,
            WEIGHT VARCHAR NOT NULL,
+           KILOS NUMBER NOT NULL,
            DT_TM TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
-          );
+          );      
           """;
 
-    String index =
-        "CREATE INDEX IF NOT EXISTS WEIGHTCONVERTER.DT_TM_IDX ON WEIGHTCONVERTER.WEIGHT(DT_TM);";
+        String index
+                = "CREATE INDEX IF NOT EXISTS WEIGHTCONVERTER.DT_TM_IDX ON WEIGHTCONVERTER.WEIGHT(DT_TM);";
 
-    try (Connection connection =
-            DriverManager.getConnection(getConnectionString(), JDBC_USER, JDBC_PWD);
-        Statement statement = connection.createStatement()) {
+        try (Connection connection
+                = DriverManager.getConnection(getConnectionString(), JDBC_USER, JDBC_PWD); Statement statement = connection.createStatement()) {
 
-      statement.addBatch(schema);
-      statement.addBatch(weightTable);
-      statement.addBatch(index);
-      statement.executeBatch();
+            statement.addBatch(schema);
+            statement.addBatch(weightTable);
+            statement.addBatch(index);
+            statement.executeBatch();
 
-    } catch (SQLException | FileNotFoundException ex) {
-      throw new WeightConverterException(ex.getLocalizedMessage(), ex);
+        } catch (SQLException | FileNotFoundException ex) {
+            throw new WeightConverterException(ex.getLocalizedMessage(), ex);
+        }
     }
-  }
 
-  private String getConnectionString() throws FileNotFoundException {
+    private String getConnectionString() throws FileNotFoundException {
 
-    return getStorageType(StorageService::getPrivateStorage)
-        .map(path -> "jdbc:h2:" + path + File.separatorChar + "weightconverter")
-        .orElseThrow(() -> new FileNotFoundException("Could not access private storage."));
-  }
+        return getStorageType(StorageService::getPrivateStorage)
+                .map(path -> "jdbc:h2:" + path + File.separatorChar + "weightconverter")
+                .orElseThrow(() -> new FileNotFoundException("Could not access private storage."));
+    }
 
-  /**
-   * Get past weights
-   *
-   * @return Collection of {@link PastWeight}
-   */
-  public ObservableList<PastWeight> getPastWeights() {
+    /**
+     * Get past weights
+     *
+     * @return Collection of {@link PastWeight}
+     */
+    public ObservableList<PastWeight> getPastWeights() {
 
-    String retrieveWeights =
-        """
-        SELECT W.ID, W.WEIGHT, W.DT_TM
+        ObservableList<PastWeight> results = FXCollections.observableArrayList();
+
+        String retrieveWeights
+                = """
+        SELECT W.ID, W.WEIGHT, W.KILOS, W.DT_TM
         FROM WEIGHTCONVERTER.WEIGHT W
         ORDER BY W.DT_TM DESC;
         """;
 
-    try (Connection connection =
-            DriverManager.getConnection(getConnectionString(), JDBC_USER, JDBC_PWD);
-        Statement statement =
-            connection.createStatement(
-                ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY)) {
+        try (Connection connection
+                = DriverManager.getConnection(getConnectionString(), JDBC_USER, JDBC_PWD); Statement statement
+                = connection.createStatement(
+                        ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY)) {
 
-      boolean execution = statement.execute(retrieveWeights);
+            boolean execution = statement.execute(retrieveWeights);
 
-      if (execution) {
-        ResultSet resultSet = statement.getResultSet();
-        if (resultSet.last()) {
-          ObservableList<PastWeight> results = FXCollections.observableArrayList();
-          resultSet.beforeFirst();
+            if (execution) {
+                ResultSet resultSet = statement.getResultSet();
+                if (resultSet.last()) {
+                    resultSet.beforeFirst();
 
-          while (resultSet.next()) {
-            results.add(
-                new PastWeight(
-                    resultSet.getLong(1),
-                    resultSet.getString(2),
-                    resultSet.getTimestamp(3).toLocalDateTime()));
-          }
+                    while (resultSet.next()) {
+                        results.add(
+                                new PastWeight(
+                                        resultSet.getLong(1),
+                                        resultSet.getString(2),
+                                        resultSet.getDouble(3),
+                                        resultSet.getTimestamp(4).toLocalDateTime()));
+                    }
 
-          return results;
+                    return results;
+                }
+            }
+        } catch (SQLException | FileNotFoundException ex) {
+            Logger.getLogger(Database.class.getName()).log(Level.SEVERE, null, ex);
         }
-      }
-    } catch (SQLException | FileNotFoundException ex) {
-      Logger.getLogger(Database.class.getName()).log(Level.SEVERE, null, ex);
+
+        return results;
     }
 
-    return FXCollections.observableArrayList();
-  }
+    /**
+     * Insert a new weight
+     *
+     * @param weight weight in stones, pounds and ounces
+     * @param kilos weight in kilos
+     */
+    public void setWeight(String weight, double kilos) {
 
-  /**
-   * Insert a new weight
-   *
-   * @param weight weight
-   */
-  public void setWeight(String weight) {
+        setWeight(weight, kilos, LocalDateTime.now());
+    }
 
-    setWeight(weight, LocalDateTime.now());
-  }
+    /**
+     * Modify a date and time
+     *
+     * @param dtTm date and time
+     * @param id id
+     */
+    public void setDate(LocalDateTime dtTm, long id) {
 
-  public void setWeight(String weight, LocalDateTime dtTm) {
+        String updateDtTm = """
+                          UPDATE WEIGHTCONVERTER.WEIGHT
+                          SET DT_TM = ?
+                          WHERE ID = ?
+                          """;
+        try (Connection connection
+                = DriverManager.getConnection(getConnectionString(), JDBC_USER, JDBC_PWD); PreparedStatement prepareStatement = connection.prepareStatement(updateDtTm)) {
 
-    String insertWeight =
-        """
+            prepareStatement.setTimestamp(1, Timestamp.valueOf(dtTm));
+            prepareStatement.setLong(2, id);
+            prepareStatement.executeUpdate();
+        } catch (SQLException | FileNotFoundException ex) {
+            Logger.getLogger(Database.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+    }
+
+    public void setWeight(String weight, double kilos, LocalDateTime dtTm) {
+
+        String insertWeight
+                = """
         INSERT INTO WEIGHTCONVERTER.WEIGHT
-        (WEIGHT, DT_TM)
-        VALUES (?, ?)
+        (WEIGHT, KILOS, DT_TM)
+        VALUES (?, ?, ?)
         """;
 
-    try (Connection connection =
-            DriverManager.getConnection(getConnectionString(), JDBC_USER, JDBC_PWD);
-        PreparedStatement prepareStatement = connection.prepareStatement(insertWeight)) {
+        try (Connection connection
+                = DriverManager.getConnection(getConnectionString(), JDBC_USER, JDBC_PWD); PreparedStatement prepareStatement = connection.prepareStatement(insertWeight)) {
 
-      prepareStatement.setString(1, weight);
-      prepareStatement.setTimestamp(2, Timestamp.valueOf(dtTm));
-      prepareStatement.executeUpdate();
-    } catch (SQLException | FileNotFoundException ex) {
-      Logger.getLogger(Database.class.getName()).log(Level.SEVERE, null, ex);
+            prepareStatement.setString(1, weight);
+            prepareStatement.setDouble(2, kilos);
+            prepareStatement.setTimestamp(3, Timestamp.valueOf(dtTm));
+            prepareStatement.executeUpdate();
+        } catch (SQLException | FileNotFoundException ex) {
+            Logger.getLogger(Database.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
-  }
 
-  /**
-   * Attempts to delete a past weight from the connection supplier.
-   *
-   * @param id weight unique identifier
-   */
-  public void deletePastWeight(long id) {
-    String deleteWeight =
-        """
+    /**
+     * Attempts to delete a past weight from the connection supplier.
+     *
+     * @param id weight unique identifier
+     */
+    public void deletePastWeight(long id) {
+        String deleteWeight
+                = """
         DELETE FROM WEIGHTCONVERTER.WEIGHT W
         WHERE W.ID = ?
         """;
 
-    try (Connection connection =
-            DriverManager.getConnection(getConnectionString(), JDBC_USER, JDBC_PWD);
-        PreparedStatement prepareStatement = connection.prepareStatement(deleteWeight)) {
+        try (Connection connection
+                = DriverManager.getConnection(getConnectionString(), JDBC_USER, JDBC_PWD); PreparedStatement prepareStatement = connection.prepareStatement(deleteWeight)) {
 
-      prepareStatement.setLong(1, id);
-      prepareStatement.executeUpdate();
-    } catch (SQLException | FileNotFoundException ex) {
-      Logger.getLogger(Database.class.getName()).log(Level.SEVERE, null, ex);
+            prepareStatement.setLong(1, id);
+            prepareStatement.executeUpdate();
+        } catch (SQLException | FileNotFoundException ex) {
+            Logger.getLogger(Database.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
-  }
 
-  private static <T> T getStorageType(Function<StorageService, T> storageService) {
-    return Services.get(StorageService.class).map(storageService::apply).orElse(null);
-  }
+    private static <T> T getStorageType(Function<StorageService, T> storageService) {
+        return Services.get(StorageService.class).map(storageService::apply).orElse(null);
+    }
 }

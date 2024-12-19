@@ -26,45 +26,55 @@ package com.fluffy.luffs.weight.converter.controllers;
 
 import com.fluffy.luffs.weight.converter.impl.FormulaImpl;
 
-/**
- * Formula Interface
- */
+/** Formula Interface */
 public interface Formula {
-    
-    /**
-     * Converts Kilograms to Stones, Pounds and Ounces.
-     * @param kilos {@link double}
-     * @return String
-     */
-    public String kilosToStones(double kilos);
-    
-    /**
-     * Converts Kilograms to Pounds.
-     * @param kilos {@link double}
-     * @return String
-     */
-    public String kilosToPounds(double kilos);
-    
-    /**
-     * Converts Pounds to Kilograms.
-     * @param pounds {@link double}
-     * @return String
-     */
-    public String poundsToKilos(double pounds);
-    
-    /**
-     * Converts Pounds to Stones, Pounds and Ounces.
-     * @param pounds {@link double}
-     * @return String
-     */
-    public String poundsToStones(double pounds);
-    
-    /**
-     * Factory method.
-     * @return {@link FormulaImpl}
-     */
-    public static FormulaImpl create() {
-        return new FormulaImpl();
-    }
-    
+
+  /**
+   * Converts Kilograms to Stones, Pounds and Ounces.
+   *
+   * @param kilos {@link double}
+   * @return String
+   */
+  public String kilosToStones(double kilos);
+
+  /**
+   * Converts Kilograms to Pounds.
+   *
+   * @param kilos {@link double}
+   * @return String
+   */
+  public String kilosToPounds(double kilos);
+
+  /**
+   * Converts Pounds to Kilograms.
+   *
+   * @param pounds {@link double}
+   * @return String
+   */
+  public String poundsToKilos(double pounds);
+
+  /**
+   * Converts Pounds to Stones, Pounds and Ounces.
+   *
+   * @param pounds {@link double}
+   * @return String
+   */
+  public String poundsToStones(double pounds);
+
+  /**
+   * Converts Pounds to Kilograms.
+   *
+   * @param pounds {@link double}
+   * @return {@link double}
+   */
+  public double kilos(double pounds);
+
+  /**
+   * Factory method.
+   *
+   * @return {@link FormulaImpl}
+   */
+  public static FormulaImpl create() {
+    return new FormulaImpl();
+  }
 }

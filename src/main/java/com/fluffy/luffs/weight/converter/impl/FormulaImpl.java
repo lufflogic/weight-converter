@@ -27,50 +27,66 @@ package com.fluffy.luffs.weight.converter.impl;
 import com.fluffy.luffs.weight.converter.controllers.Formula;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.function.Function;
 
-/**
- * Formula implementation.
- */
+/** Formula implementation. */
 public class FormulaImpl implements Formula {
 
-    private static final double KILO_TO_STONE = 6.350293;
-    private static final int STONES_TO_LBS = 14;
-    private static final int LBS_TO_OUNCES = 16;
-    private static final double KILO_TO_POUNDS = 0.45359237;
-    private static final double POUNDS_TO_KILOS = 2.20462262185;
-    
-    @Override
-    public String kilosToStones(double kilos) {
-        return convertToStones(kilos, KILO_TO_STONE);
-    }
+  private static final double KILO_TO_STONE = 6.350293;
+  private static final int STONES_TO_LBS = 14;
+  private static final int LBS_TO_OUNCES = 16;
+  private static final double KILO_TO_POUNDS = 0.45359237;
+  private static final double POUNDS_TO_KILOS = 2.20462262185;
 
-    @Override
-    public String poundsToStones(double pounds) {
-        return convertToStones(pounds, STONES_TO_LBS);
-    }
+  @Override
+  public String kilosToStones(double kilos) {
+    return convertToStones(kilos, KILO_TO_STONE);
+  }
 
-    private String convertToStones(double value, double divisor) {
-        BigDecimal stonesDecimal = new BigDecimal(value/divisor);
-        int stones = stonesDecimal.intValue();
-        BigDecimal lbsDecimal = stonesDecimal.subtract(new BigDecimal(stones)).multiply(new BigDecimal(STONES_TO_LBS));
-        int lbs = lbsDecimal.intValue();
-        int ounces = lbsDecimal.subtract(new BigDecimal(lbs)).multiply(new BigDecimal(LBS_TO_OUNCES)).setScale(0, RoundingMode.UP).intValue();
-        
-        return new StringBuilder().append(stones).append("st ").append(lbs).append("lb ").append(ounces).append("oz").toString();
-    }
-    
-    @Override
-    public String kilosToPounds(double kilos) {
-        return convertUnit(kilos, KILO_TO_POUNDS, 0);
-    }
+  @Override
+  public String poundsToStones(double pounds) {
+    return convertToStones(pounds, STONES_TO_LBS);
+  }
 
-    @Override
-    public String poundsToKilos(double pounds) {
-        return convertUnit(pounds, POUNDS_TO_KILOS, 2);
-    }
-    
-    private String convertUnit(double value, double divsor, int scale) {
-        return new BigDecimal(value/divsor).setScale(scale, RoundingMode.HALF_UP).toPlainString();
-    }
+  private String convertToStones(double value, double divisor) {
+    BigDecimal stonesDecimal = new BigDecimal(value / divisor);
+    int stones = stonesDecimal.intValue();
+    BigDecimal lbsDecimal =
+        stonesDecimal.subtract(new BigDecimal(stones)).multiply(new BigDecimal(STONES_TO_LBS));
+    int lbs = lbsDecimal.intValue();
+    int ounces =
+        lbsDecimal
+            .subtract(new BigDecimal(lbs))
+            .multiply(new BigDecimal(LBS_TO_OUNCES))
+            .setScale(0, RoundingMode.UP)
+            .intValue();
 
+    return new StringBuilder()
+        .append(stones)
+        .append("st ")
+        .append(lbs)
+        .append("lb ")
+        .append(ounces)
+        .append("oz")
+        .toString();
+  }
+
+  @Override
+  public String kilosToPounds(double kilos) {
+    return convertUnit(kilos, KILO_TO_POUNDS, 0, BigDecimal::toPlainString);
+  }
+
+  @Override
+  public String poundsToKilos(double pounds) {
+    return convertUnit(pounds, POUNDS_TO_KILOS, 2, BigDecimal::toPlainString);
+  }
+
+  @Override
+  public double kilos(double pounds) {
+    return convertUnit(pounds, POUNDS_TO_KILOS, 2, BigDecimal::floatValue).doubleValue();
+  }
+
+  private <R> R convertUnit(double value, double divsor, int scale, Function<BigDecimal, R> s) {
+    return s.apply(new BigDecimal(value / divsor).setScale(scale, RoundingMode.HALF_UP));
+  }
 }

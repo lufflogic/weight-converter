@@ -21,7 +21,6 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
  */
-
 package com.fluffy.luffs.weight.converter.controllers.model;
 
 import javafx.scene.control.Button;
@@ -42,7 +41,7 @@ public class WeightListCell extends ListCell<PastWeight> {
 
     /**
      * Constructor
-     * 
+     *
      * @param width width of the containing component.
      */
     public WeightListCell(double width) {
@@ -55,9 +54,9 @@ public class WeightListCell extends ListCell<PastWeight> {
         weightLabel.getStyleClass().add("weightLabel");
         dateLabel.getStyleClass().add("dateLabel");
         deleteButton.getStyleClass().add("deleteButton");
-        
+
         this.width = width;
-        
+
     }
 
     @Override

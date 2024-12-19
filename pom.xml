@@ -23,9 +23,9 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <mainClass>com.fluffy.luffs.weight.converter.WeightConverter</mainClass>
-        <javafx.version>17.0.1</javafx.version>
-        <gluon.attach>4.0.15</gluon.attach>
-        <graalVMVersion>22.1.0.1-Final</graalVMVersion>
+        <javafx.version>23.0.1</javafx.version>
+        <gluon.attach>4.0.21</gluon.attach>
+        <graalVMVersion>23+25.1-dev</graalVMVersion>
         <ios.release.providedSigningIdentity/>
         <ios.release.providedProvisioningProfile/>
     </properties>
@@ -52,15 +52,15 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.10.1</version>
+                <version>3.13.0</version>
                 <configuration>
-                    <release>17</release>
+                    <release>23</release>
                 </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-release-plugin</artifactId>
-                <version>3.0.0-M6</version>
+                <version>3.0.1</version>
                 <configuration>
                     <pushChanges>false</pushChanges>
                     <tagNameFormat>${project.version}</tagNameFormat>
@@ -69,7 +69,7 @@
             <plugin>
                 <groupId>com.gluonhq</groupId>
                 <artifactId>gluonfx-maven-plugin</artifactId>
-                <version>1.0.15</version>                
+                <version>1.0.25-SNASPSHOT</version>                
                 <configuration>
                     <reflectionList>
                         <list>com.fluffy.luffs.weight.converter.controllers.WeightConverterController</list>
@@ -95,7 +95,7 @@
                     </attachList>
                     
                     <target>${build.target}</target>
-                    <graalvmHome>/Library/Java/JavaVirtualMachines/graalvm-svm-java17-darwin-gluon-${graalVMVersion}/Contents/Home</graalvmHome>
+                    <graalvmHome>//Library/Java/JavaVirtualMachines/graalvm-java23-darwin-aarch64-gluon-${graalVMVersion}/Contents/Home</graalvmHome>
                     <mainClass>${mainClass}</mainClass>
                     
                     <releaseConfiguration>      
@@ -233,7 +233,7 @@
         <dependency>
             <groupId>org.tmatesoft.sqljet</groupId>
             <artifactId>sqljet</artifactId>
-            <version>1.1.14</version>
+            <version>1.1.15</version>
         </dependency>
     </dependencies>
     
@@ -257,7 +257,7 @@
             <properties>
                 <attach.classifier>ios</attach.classifier>
                 <build.target>ios-sim</build.target>
-                <simulatorDevice>iPhone 14 Pro Max</simulatorDevice>
+                <simulatorDevice>iPhone 16 Pro Max</simulatorDevice>
             </properties>
         </profile>
         <profile>

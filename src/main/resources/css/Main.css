@@ -22,6 +22,15 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+.root { 
+    -fx-focus-color: transparent;
+}
+
+.toggles-hbox {
+    -fx-spacing: 10px;
+    -fx-alignment: CENTER;
+}
+
 .deleteButton {
     -fx-background-color: #ff0033;
     -fx-text-fill: #ffffff;
@@ -37,7 +46,7 @@ SOFTWARE.
     -fx-text-overrun: ellipsis;
 }
 
-#saveWeight {
+.saveWeight {
     -fx-font-size: 30px ;
 }
 
@@ -60,6 +69,12 @@ SOFTWARE.
     -fx-text-alignment: center;
 }
 
+.weightConverterToggleButton {
+    -fx-font-size: 20px ;
+    -fx-text-fill: #666666;
+    -fx-text-alignment: center;
+}
+
 .text-field:focused {
     -fx-background-color: -fx-focus-color, -fx-background ;
 }
@@ -72,6 +87,7 @@ SOFTWARE.
     -fx-font-size: 20px;
     -fx-text-alignment: center;
     -fx-text-fill: #666666;
+    -fx-alignment: CENTER;
 }
 
 .placeholderLabel {
@@ -93,8 +109,10 @@ SOFTWARE.
     -fx-text-fill: #666666;
 }
 
-#AnchorPane {
+.stackPane {
     -fx-background-color: #e8e8e8;
+    -fx-pref-width: 335px;
+    -fx-pref-height: 600px;
 }
 
 .list-view {
@@ -103,7 +121,16 @@ SOFTWARE.
     -fx-effect: dropshadow( gaussian , lightgray , 30,0,0,1 );
 }
 
+/*.list-view .list-cell {
+    -fx-background-color: transparent;
+}*/
+
 .list-view .scroll-bar:vertical {
+    -fx-opacity: 0;
+    -fx-padding:-10;
+}
+
+.list-view .scroll-bar:horizontal {
     -fx-opacity: 0;
     -fx-padding:-10;
 }
