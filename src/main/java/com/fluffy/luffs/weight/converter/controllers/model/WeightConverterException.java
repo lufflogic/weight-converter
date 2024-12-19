@@ -21,32 +21,21 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
  */
-package com.fluffy.luffs.weight.converter;
 
-import com.fluffy.luffs.weight.converter.controllers.WeightConverterController;
-import javafx.application.Application;
-import javafx.scene.Scene;
-import javafx.stage.Stage;
+package com.fluffy.luffs.weight.converter.controllers.model;
 
 /**
- * Weight Converter
+ * WeightConverterException
  *
- * @author chrisluff
+ * @author Chris
  */
-public class WeightConverter extends Application {
+public class WeightConverterException extends RuntimeException {
 
-    @Override
-    public void start(Stage stage) throws Exception {
-        WeightConverterController weightConverterController = WeightConverterController.create();
-        Scene scene = new Scene(weightConverterController);
+  public WeightConverterException(String message) {
+    super(message);
+  }
 
-        scene.getStylesheets().addAll(this.getClass().getResource("/css/Main.css").toExternalForm());
-        stage.setScene(scene);
-
-        stage.show();
-    }
-
-    public static void main(String[] args) {
-        launch();
-    }
+  public WeightConverterException(String message, Throwable cause) {
+    super(message, cause);
+  }
 }

@@ -1,7 +1,7 @@
 /*
 MIT License
 
-Copyright (c) 2020 Chris Luff
+Copyright (c) 2022  Fluffy Luffs
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -24,84 +24,95 @@ SOFTWARE.
 
 package com.fluffy.luffs.weight.converter.controllers.model;
 
-import com.fluffy.luffs.weight.converter.Formula;
+import com.fluffy.luffs.weight.converter.controllers.Formula;
 import java.util.regex.Pattern;
 
-/**
- *
- * Weight
- */
+/** Weight */
 public enum Weight {
-
-        KG("Kilograms") {
-            @Override
-            public Pattern getCompilePattern() {
-                return Pattern.compile("-?((\\d{0,3})|(\\d+\\.\\d{0,2}))");
-            }
-
-            @Override
-            public String getFormulaResult(String value) {
-                return Formula.create().kilosToStones(Double.parseDouble(value));
-            }
-
-            @Override
-            public String convertInput(String value) {
-                return Formula.create().poundsToKilos(Double.parseDouble(value));
-            }
-        },
-        LBS("Pounds") {
-            @Override
-            public Pattern getCompilePattern() {
-                return Pattern.compile("-?(\\d{0,3})");
-            }
-
-            @Override
-            public String getFormulaResult(String value) {
-                return Formula.create().poundsToStones(Double.parseDouble(value));
-            }
-
-            @Override
-            public String convertInput(String value) {
-                return Formula.create().kilosToPounds(Double.parseDouble(value));
-            }
-
-        };
-
-        private final String fullName;
-
-        private Weight(String fullName) {
-            this.fullName = fullName;
-        }
-
-        /**
-         * Get the Full Name
-         *
-         * @return String
-         */
-        public String getFullName() {
-            return fullName;
-        }
-
-        /**
-         * Gets the accepted characters regex compilation.
-         *
-         * @return {@link Pattern}
-         */
-        public abstract Pattern getCompilePattern();
-
-        /**
-         * Gets the string representation of the calculated result.
-         *
-         * @param value to be calculated.
-         * @return String
-         */
-        public abstract String getFormulaResult(String value);
-
-        /**
-         * Gets the converted input value.
-         *
-         * @param value to be calculated.
-         * @return String
-         */
-        public abstract String convertInput(String value);
+  KG("Kilograms") {
+    @Override
+    public Pattern getCompilePattern() {
+      return Pattern.compile("-?((\\d{0,3})|(\\d+\\.\\d{0,2}))");
     }
+
+    @Override
+    public String getFormulaResult(String value) {
+      return Formula.create().kilosToStones(Double.parseDouble(value));
+    }
+
+    @Override
+    public String convertInput(String value) {
+      return Formula.create().poundsToKilos(Double.parseDouble(value));
+    }
+
+    @Override
+    public double getKilos(String value) {
+      return Double.parseDouble(value);
+    }
+  },
+  LBS("Pounds") {
+    @Override
+    public Pattern getCompilePattern() {
+      return Pattern.compile("-?(\\d{0,3})");
+    }
+
+    @Override
+    public String getFormulaResult(String value) {
+      return Formula.create().poundsToStones(Double.parseDouble(value));
+    }
+
+    @Override
+    public String convertInput(String value) {
+      return Formula.create().kilosToPounds(Double.parseDouble(value));
+    }
+
+    public double getKilos(String value) {
+      return Formula.create().kilos(Double.parseDouble(value));
+    }
+  };
+
+  private final String fullName;
+
+  private Weight(String fullName) {
+    this.fullName = fullName;
+  }
+
+  /**
+   * Get the Full Name
+   *
+   * @return String
+   */
+  public String getFullName() {
+    return fullName;
+  }
+
+  /**
+   * Gets the accepted characters regex compilation.
+   *
+   * @return {@link Pattern}
+   */
+  public abstract Pattern getCompilePattern();
+
+  /**
+   * Gets the string representation of the calculated result.
+   *
+   * @param value to be calculated.
+   * @return String
+   */
+  public abstract String getFormulaResult(String value);
+
+  /**
+   * Gets the converted input value.
+   *
+   * @param value to be calculated.
+   * @return String
+   */
+  public abstract String convertInput(String value);
+
+  /**
+   * Gets the kilo value of the input value
+   * @param value to be calculated.
+   * @return {@link double}
+   */
+  public abstract double getKilos(String value);
+}

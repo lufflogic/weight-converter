@@ -1,7 +1,7 @@
 /*
 MIT License
 
-Copyright (c) 2020 Chris Luff
+Copyright (c) 2022  Fluffy Luffs
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -20,28 +20,8 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-*/
+ */
+package com.fluffy.luffs.weight.converter.controllers.model;
 
-module WeightConverter {
-    requires javafx.baseEmpty;
-    requires javafx.base;
-    requires javafx.controlsEmpty;
-    requires javafx.controls;
-    requires javafx.graphicsEmpty;
-    requires javafx.graphics;
-    requires javafx.fxmlEmpty;
-    requires javafx.fxml;
-    
-    requires com.gluonhq.attach.util;
-    requires com.gluonhq.attach.storage;
-    requires com.gluonhq.attach.statusbar;
-    
-    requires java.sql;
-    
-    requires sqljet;
-    requires java.base;
-    
-    opens com.fluffy.luffs.weight.converter.controllers to javafx.fxml;
-
-    exports com.fluffy.luffs.weight.converter;
-}
+/** CurrentWeight */
+public record CurrentWeight(String stones, double kg) {}
