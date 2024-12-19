@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.fluffy.luffs</groupId>
     <artifactId>weight-converter</artifactId>
-    <version>1.1.1-SNAPSHOT</version>
+    <version>1.2.0</version>
     <packaging>jar</packaging>
     
     <name>WeightConverter</name>
@@ -26,8 +26,8 @@
         <javafx.version>23.0.1</javafx.version>
         <gluon.attach>4.0.21</gluon.attach>
         <graalVMVersion>23+25.1-dev</graalVMVersion>
-        <ios.release.providedSigningIdentity/>
-        <ios.release.providedProvisioningProfile/>
+        <ios.release.providedSigningIdentity />
+        <ios.release.providedProvisioningProfile />
     </properties>
     
     <scm>
