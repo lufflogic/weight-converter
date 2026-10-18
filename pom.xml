@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.fluffy.luffs</groupId>
     <artifactId>weight-converter</artifactId>
-    <version>1.4.0-SNAPSHOT</version>
+    <version>2.0.0</version>
     <packaging>jar</packaging>
     
     <name>WeightConverter</name>
@@ -33,7 +33,7 @@
     <scm>
         <connection>scm:git:https://github.com/cbm64chris/${project.artifactId}.git</connection>
         <developerConnection>scm:git:https://github.com/cbm64chris/${project.artifactId}.git</developerConnection>
-        <tag>1.2.0</tag>
+        <tag>2.0.0</tag>
         <url>https://github.com/cbm64chris/${project.artifactId}</url>
     </scm>
     
@@ -68,7 +68,7 @@
                 <version>3.1.1</version>
                 <configuration>
                     <pushChanges>false</pushChanges>
-                    <tagNameFormat>${project.version}</tagNameFormat>
+                    <tagNameFormat>@{project.version}</tagNameFormat>
                 </configuration>
             </plugin>
             <plugin>
