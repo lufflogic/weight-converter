@@ -35,6 +35,45 @@ class WeightTrendTest {
   }
 
   @Test
+  void ignoresWeightsOlderThanThirtyDays() {
+    LocalDateTime now = LocalDateTime.of(2026, 10, 18, 12, 0);
+    List<PastWeight> weights = List.of(
+        new PastWeight(1, "", 81, now),
+        new PastWeight(2, "", 80, now.minusDays(1)),
+        new PastWeight(3, "", 100, now.minusDays(31)));
+    assertEquals(WeightTrend.UP, WeightTrend.calculateLast30Days(weights, now));
+    assertEquals(3, weights.size());
+  }
+
+  @Test
+  void includesTheExactCutoffButNotEarlierEntries() {
+    LocalDateTime now = LocalDateTime.of(2026, 10, 18, 12, 0);
+    PastWeight current = new PastWeight(1, "", 81, now);
+    PastWeight cutoff = new PastWeight(2, "", 80, now.minusDays(30));
+    PastWeight older = new PastWeight(3, "", 80, now.minusDays(30).minusNanos(1));
+    assertEquals(WeightTrend.UP, WeightTrend.calculateLast30Days(List.of(current, cutoff), now));
+    assertEquals(WeightTrend.NONE, WeightTrend.calculateLast30Days(List.of(current, older), now));
+  }
+
+  @Test
+  void ignoresFutureDates() {
+    LocalDateTime now = LocalDateTime.of(2026, 10, 18, 12, 0);
+    List<PastWeight> weights = List.of(
+        new PastWeight(1, "", 100, now.plusNanos(1)),
+        new PastWeight(2, "", 79, now),
+        new PastWeight(3, "", 80, now.minusDays(1)));
+    assertEquals(WeightTrend.DOWN, WeightTrend.calculateLast30Days(weights, now));
+  }
+
+  @Test
+  void oldHistoryHasNoTrend() {
+    LocalDateTime now = LocalDateTime.of(2026, 10, 18, 12, 0);
+    assertEquals(WeightTrend.NONE, WeightTrend.calculateLast30Days(List.of(
+        new PastWeight(1, "", 81, now.minusDays(31)),
+        new PastWeight(2, "", 80, now.minusDays(32))), now));
+  }
+
+  @Test
   void recalculatesWhenHistoryChanges() {
     List<PastWeight> history = new ArrayList<>(history(81, 79, 80));
     assertEquals(WeightTrend.UP, WeightTrend.calculate(history));

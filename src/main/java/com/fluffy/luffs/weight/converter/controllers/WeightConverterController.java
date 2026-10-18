@@ -38,11 +38,13 @@ import com.gluonhq.attach.keyboard.KeyboardType;
 import com.gluonhq.attach.util.Platform;
 
 import java.io.FileNotFoundException;
+import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Stream;
 import javafx.animation.Interpolator;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
@@ -56,9 +58,13 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleGroup;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Region;
+import javafx.scene.layout.Background;
+import javafx.scene.layout.BackgroundFill;
+import javafx.scene.layout.CornerRadii;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.SVGPath;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
@@ -77,7 +83,7 @@ public class WeightConverterController extends StackPane {
   private final WeightConverterToggleButton lbsButton = new WeightConverterToggleButton(Weight.LBS);
   private final WeightConverterToggleButton stones = new WeightConverterToggleButton(Weight.STONES);
 
-  private final ImageView trendimageView = new ImageView();
+  private final Region trendIndicator = new Region();
 
   private final VBox vBox = new VBox();
   private final HBox toogles = new HBox();
@@ -122,8 +128,6 @@ public class WeightConverterController extends StackPane {
           return cell;
         });
 
-    VBox.setVgrow(pastWeights, Priority.ALWAYS);
-
     kgButton.setOnAction(eh -> setWeightValue(kgButton.getWeight()));
     lbsButton.setOnAction(eh -> setWeightValue(lbsButton.getWeight()));
 
@@ -148,18 +152,26 @@ public class WeightConverterController extends StackPane {
 
     saveWeight.setMaxWidth(Double.MAX_VALUE);
 
-    trendimageView.setOpacity(.20);
-    trendimageView.fitWidthProperty().bind(pastWeights.widthProperty().multiply(.80));
-    trendimageView.fitHeightProperty().bind(pastWeights.heightProperty().multiply(.80));
-    trendimageView.setMouseTransparent(true);
+    SVGPath arrow = new SVGPath();
+    arrow.setContent("M 50 0 L 100 45 L 70 45 L 70 100 L 30 100 L 30 45 L 0 45 Z");
+    trendIndicator.setShape(arrow);
+    trendIndicator.setScaleShape(true);
+    trendIndicator.setBackground(
+        new Background(new BackgroundFill(Color.BLACK, CornerRadii.EMPTY, Insets.EMPTY)));
+    trendIndicator.setOpacity(.08);
+    trendIndicator.maxWidthProperty().bind(pastWeights.widthProperty().multiply(.80));
+    trendIndicator.maxHeightProperty().bind(pastWeights.heightProperty().multiply(.80));
+    trendIndicator.setMouseTransparent(true);
 
-    StackPane stackPane = new StackPane(pastWeights, trendimageView);
+    StackPane stackPane = new StackPane(pastWeights, trendIndicator);
+    VBox.setVgrow(stackPane, Priority.ALWAYS);
+    stackPane.setMinHeight(0);
+    pastWeights.setMinHeight(0);
 
     setVBox(toogles, new Insets(50, 50, 0, 50));
     setVBox(weightValue, new Insets(20, 75, 0, 75));
     setVBox(saveWeight, new Insets(5, 20, 10, 20));
     setVBox(infoLabel, new Insets(5, 0, 0, 0));
-    setVBox(pastWeights, new Insets(0, 0, 5, 0));
 
     vBox.getChildren().addAll(List.of(toogles, weightValue, infoLabel, saveWeight, stackPane));
 
@@ -168,28 +180,18 @@ public class WeightConverterController extends StackPane {
     return this;
   }
 
-  private Image setTrend() {
-    WeightTrend trend = WeightTrend.calculate(pastWeights.getItems());
-    trendimageView.setAccessibleText(I18n.text(switch (trend) {
-      case UP -> "trend.up";
-      case DOWN -> "trend.down";
-      case NONE -> "trend.none";
-    }));
-    return switch (trend) {
-      case UP -> getImage("/images/up.png");
-      case DOWN -> getImage("/images/down.png");
-      case NONE -> null;
-    };
-  }
-
-  private Image getImage(String imageLocation) {
-
-    return new Image(
-        WeightConverterController.class.getResource(imageLocation).toExternalForm(),
-        100,
-        100,
-        false,
-        true);
+  private void updateTrend() {
+    WeightTrend trend =
+        WeightTrend.calculateLast30Days(pastWeights.getItems(), LocalDateTime.now());
+    trendIndicator.setAccessibleText(
+        I18n.text(
+            switch (trend) {
+              case UP -> "trend.up";
+              case DOWN -> "trend.down";
+              case NONE -> "trend.none";
+            }));
+    trendIndicator.setVisible(trend != WeightTrend.NONE);
+    trendIndicator.setRotate(trend == WeightTrend.DOWN ? 180 : 0);
   }
 
   private void setVBox(Node node, Insets insets) {
@@ -201,8 +203,11 @@ public class WeightConverterController extends StackPane {
     getStyleClass().add("stackPane");
     weightValue.getStyleClass().add("text-field");
     saveWeight.getStyleClass().add("saveWeight");
-    kgButton.getStyleClass().add("weightConverterToggleButton");
-    lbsButton.getStyleClass().add("weightConverterToggleButton");
+
+    Stream.of(kgButton, lbsButton, stones)
+        .map(Node::getStyleClass)
+        .forEach(style -> style.add("weightConverterToggleButton"));
+
     toogles.getStyleClass().add("toggles-hbox");
     infoLabel.getStyleClass().add("infoLabel");
   }
@@ -211,8 +216,10 @@ public class WeightConverterController extends StackPane {
     setInfoLabel(weight.getFullName());
     Optional.ofNullable(weightValue.getText())
         .filter(this::isValidWeight)
-        .ifPresent(value -> weightValue.setText(
-            I18n.displayNumber(weight.convertInput(I18n.normalizeNumber(value)))));
+        .ifPresent(
+            value ->
+                weightValue.setText(
+                    I18n.displayNumber(weight.convertInput(I18n.normalizeNumber(value)))));
   }
 
   private void transitionDeleteButton(Button deleteButton, Direction direction) {
@@ -274,7 +281,7 @@ public class WeightConverterController extends StackPane {
 
   private void refreshPastWeights() {
     pastWeights.setItems(getPastWeights());
-    trendimageView.setImage(setTrend());
+    updateTrend();
   }
 
   private static ObservableList<PastWeight> getPastWeights() {
@@ -290,8 +297,9 @@ public class WeightConverterController extends StackPane {
   }
 
   private void setWeightText(String inputString) {
-    saveWeight.setText(I18n.displayWeight(
-        getSelectedWeight().getFormulaResult(I18n.normalizeNumber(inputString))));
+    saveWeight.setText(
+        I18n.displayWeight(
+            getSelectedWeight().getFormulaResult(I18n.normalizeNumber(inputString))));
     saveWeight.setDisable(false);
   }
 
