@@ -25,9 +25,8 @@ SOFTWARE.
 package com.fluffy.luffs.weight.converter.controllers.model;
 
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
+import com.fluffy.luffs.weight.converter.i18n.I18n;
 import java.time.format.TextStyle;
-import java.util.Locale;
 
 /** PastWeight */
 public class PastWeight {
@@ -76,16 +75,16 @@ public class PastWeight {
    * @return {@link String}
    */
   public String getPastWeightWeekDay() {
-    return date.getDayOfWeek().getDisplayName(TextStyle.SHORT, Locale.getDefault());
+    return date.getDayOfWeek().getDisplayName(TextStyle.SHORT, I18n.locale());
   }
 
   /**
-   * Get the date of the stored weight in the format dd MMM YYYY.
+   * Get the date of the stored weight in the locale's medium date format.
    *
    * @return {@link String}
    */
   public String getPastWeightFormattedDate() {
-    return date.format(DateTimeFormatter.ofPattern("dd MMM YYYY"));
+    return I18n.displayDate(I18n.locale(), date);
   }
 
   /**

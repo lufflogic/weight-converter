@@ -2,6 +2,9 @@
   "resources":{
   "includes":[
     {
+      "pattern":"i18n/.*\\.properties$"
+    },
+    {
       "pattern":"\\QMETA-INF/services/java.sql.Driver\\E"
     }, 
     {
@@ -15,6 +18,10 @@
     }
   ]},
   "bundles":[
+    {
+      "name":"i18n.Messages",
+      "locales":["", "en", "fr", "de", "es"]
+    },
     {
       "name":"com.sun.javafx.tk.quantum.QuantumMessagesBundle",
       "locales":[""]

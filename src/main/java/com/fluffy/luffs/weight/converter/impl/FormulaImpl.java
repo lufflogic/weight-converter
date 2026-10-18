@@ -35,8 +35,8 @@ public class FormulaImpl implements Formula {
   private static final double KILO_TO_STONE = 6.350293;
   private static final int STONES_TO_LBS = 14;
   private static final int LBS_TO_OUNCES = 16;
-  private static final double KILO_TO_POUNDS = 0.45359237;
-  private static final double POUNDS_TO_KILOS = 2.20462262185;
+  private static final double KILOGRAMS_PER_POUND = 0.45359237;
+  private static final double POUNDS_PER_KILOGRAM = 2.20462262185;
 
   @Override
   public String kilosToStones(double kilos) {
@@ -73,17 +73,17 @@ public class FormulaImpl implements Formula {
 
   @Override
   public String kilosToPounds(double kilos) {
-    return convertUnit(kilos, KILO_TO_POUNDS, 0, BigDecimal::toPlainString);
+    return convertUnit(kilos, KILOGRAMS_PER_POUND, 0, BigDecimal::toPlainString);
   }
 
   @Override
   public String poundsToKilos(double pounds) {
-    return convertUnit(pounds, POUNDS_TO_KILOS, 2, BigDecimal::toPlainString);
+    return convertUnit(pounds, POUNDS_PER_KILOGRAM, 2, BigDecimal::toPlainString);
   }
 
   @Override
   public double kilos(double pounds) {
-    return convertUnit(pounds, POUNDS_TO_KILOS, 2, BigDecimal::floatValue).doubleValue();
+    return pounds * KILOGRAMS_PER_POUND;
   }
 
   private <R> R convertUnit(double value, double divsor, int scale, Function<BigDecimal, R> s) {

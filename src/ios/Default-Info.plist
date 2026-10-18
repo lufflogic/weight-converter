@@ -2,6 +2,15 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+    <key>CFBundleDevelopmentRegion</key>
+    <string>en</string>
+    <key>CFBundleLocalizations</key>
+    <array>
+        <string>en</string>
+        <string>fr</string>
+        <string>de</string>
+        <string>es</string>
+    </array>
 	<key></key>
 	<string></string>
 	<key>UIStatusBarStyle</key>
@@ -11,9 +20,9 @@
 	<key>CFBundleIdentifier</key>
 	<string>com.fluffy.luffs.weight.converter.WeightConverter</string>
 	<key>CFBundleVersion</key>
-	<string>1.1.1-SNAPSHOT</string>
+	<string>1.2.1-SNAPSHOT</string>
 	<key>CFBundleShortVersionString</key>
-	<string>1.1.1-SNAPSHOT</string>
+	<string>1.2.1-SNAPSHOT</string>
 	<key>CFBundleExecutable</key>
 	<string>WeightConverter</string>
 	<key>CFBundleIconName</key>

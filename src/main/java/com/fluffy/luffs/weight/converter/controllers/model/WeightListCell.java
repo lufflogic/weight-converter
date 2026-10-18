@@ -23,6 +23,7 @@ SOFTWARE.
  */
 package com.fluffy.luffs.weight.converter.controllers.model;
 
+import com.fluffy.luffs.weight.converter.i18n.I18n;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
@@ -36,7 +37,7 @@ public class WeightListCell extends ListCell<PastWeight> {
     private final Label weightLabel = new Label();
     private final Label dateLabel = new Label();
     private final Pane seperator = new Pane();
-    private final Button deleteButton = new Button("DELETE");
+    private final Button deleteButton = new Button(I18n.text("action.delete"));
     private final Double width;
 
     /**
@@ -66,7 +67,7 @@ public class WeightListCell extends ListCell<PastWeight> {
         if (empty) {
             setGraphic(null);
         } else {
-            weightLabel.setText(String.format("%s", pw.getWeight()));
+            weightLabel.setText(I18n.displayWeight(pw.getWeight()));
             dateLabel.setText(String.format("%s %s", pw.getPastWeightWeekDay(), pw.getPastWeightFormattedDate()));
             setGraphic(listHBox);
             deleteButton.translateXProperty().set(width);

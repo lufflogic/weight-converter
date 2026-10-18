@@ -24,6 +24,7 @@ SOFTWARE.
 package com.fluffy.luffs.weight.converter;
 
 import com.fluffy.luffs.weight.converter.controllers.WeightConverterController;
+import com.fluffy.luffs.weight.converter.i18n.I18n;
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
@@ -42,6 +43,7 @@ public class WeightConverter extends Application {
 
         scene.getStylesheets().addAll(this.getClass().getResource("/css/Main.css").toExternalForm());
         stage.setScene(scene);
+        stage.setTitle(I18n.text("app.title"));
 
         stage.show();
     }

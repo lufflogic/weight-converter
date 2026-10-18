@@ -37,6 +37,13 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
+import java.util.Optional;
+import java.util.List;
+import java.util.ArrayDeque;
+import java.util.Deque;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.function.Supplier;
 
 import java.util.function.Function;
 import java.util.logging.Level;
@@ -50,14 +57,29 @@ import javafx.collections.ObservableList;
 @SuppressWarnings("java:S2115")
 public class Database {
 
+    private static final Logger LOG = Logger.getLogger(Database.class.getName());
     private static final String JDBC_USER = "SA";
     private static final String JDBC_PWD = "";
 
+    private static Database INSTANCE;
+
+    private Database() {
+    }
+
     /**
      * Creates the database if not present
+     *
      * @throws java.io.FileNotFoundException
      */
     public void createDatabse() throws FileNotFoundException {
+        try (Connection connection = DriverManager.getConnection(getConnectionString(), JDBC_USER, JDBC_PWD)) {
+            createSchema(connection);
+        } catch (SQLException | FileNotFoundException ex) {
+            throw new WeightConverterException(ex.getLocalizedMessage(), ex);
+        }
+    }
+
+    static void createSchema(Connection connection) throws SQLException {
 
         String schema = "CREATE SCHEMA IF NOT EXISTS WEIGHTCONVERTER";
         String weightTable
@@ -74,23 +96,83 @@ public class Database {
         String index
                 = "CREATE INDEX IF NOT EXISTS WEIGHTCONVERTER.DT_TM_IDX ON WEIGHTCONVERTER.WEIGHT(DT_TM);";
 
-        try (Connection connection
-                = DriverManager.getConnection(getConnectionString(), JDBC_USER, JDBC_PWD); Statement statement = connection.createStatement()) {
+        try (Statement statement = connection.createStatement()) {
 
             statement.addBatch(schema);
             statement.addBatch(weightTable);
             statement.addBatch(index);
+            statement.addBatch("CREATE TABLE IF NOT EXISTS WEIGHTCONVERTER.MIGRATION (NAME VARCHAR PRIMARY KEY)");
             statement.executeBatch();
-
-        } catch (SQLException | FileNotFoundException ex) {
-            throw new WeightConverterException(ex.getLocalizedMessage(), ex);
         }
     }
 
+    void migrateLegacyWeights(Supplier<List<PastWeight>> source) {
+        try (Connection connection = DriverManager.getConnection(getConnectionString(), JDBC_USER, JDBC_PWD)) {
+            importLegacyWeights(connection, source);
+        } catch (SQLException | FileNotFoundException ex) {
+            throw new WeightConverterException("Could not import legacy weights.", ex);
+        }
+    }
+
+    static void importLegacyWeights(Connection connection, Supplier<List<PastWeight>> source) throws SQLException {
+        connection.setAutoCommit(false);
+        try {
+            try (PreparedStatement check = connection.prepareStatement(
+                    "SELECT NAME FROM WEIGHTCONVERTER.MIGRATION WHERE NAME = 'sqlite-to-h2-v1'");
+                    ResultSet result = check.executeQuery()) {
+                if (result.next()) {
+                    connection.commit();
+                    return;
+                }
+            }
+            // Reuse matching rows left by the old importer, preserving duplicate source entries.
+            Map<LegacyWeightKey, Deque<Long>> existing = new HashMap<>();
+            try (Statement statement = connection.createStatement();
+                    ResultSet rows = statement.executeQuery("SELECT ID, WEIGHT, DT_TM FROM WEIGHTCONVERTER.WEIGHT ORDER BY ID")) {
+                while (rows.next()) {
+                    LegacyWeightKey key = new LegacyWeightKey(rows.getString("WEIGHT"),
+                            rows.getTimestamp("DT_TM").toLocalDateTime());
+                    existing.computeIfAbsent(key, ignored -> new ArrayDeque<>()).add(rows.getLong("ID"));
+                }
+            }
+            try (PreparedStatement insert = connection.prepareStatement(
+                    "INSERT INTO WEIGHTCONVERTER.WEIGHT (WEIGHT, KILOS, DT_TM) VALUES (?, ?, ?)");
+                    PreparedStatement repair = connection.prepareStatement(
+                            "UPDATE WEIGHTCONVERTER.WEIGHT SET KILOS = ? WHERE ID = ? AND KILOS = 0")) {
+                for (PastWeight weight : source.get()) {
+                    Deque<Long> matches = existing.get(new LegacyWeightKey(weight.getWeight(), weight.getDate()));
+                    if (matches != null && !matches.isEmpty()) {
+                        repair.setDouble(1, weight.getKilos());
+                        repair.setLong(2, matches.removeFirst());
+                        repair.executeUpdate();
+                    } else {
+                        insert.setString(1, weight.getWeight());
+                        insert.setDouble(2, weight.getKilos());
+                        insert.setTimestamp(3, Timestamp.valueOf(weight.getDate()));
+                        insert.executeUpdate();
+                    }
+                }
+            }
+            try (Statement statement = connection.createStatement()) {
+                statement.executeUpdate("INSERT INTO WEIGHTCONVERTER.MIGRATION (NAME) VALUES ('sqlite-to-h2-v1')");
+            }
+            connection.commit();
+        } catch (SQLException | RuntimeException ex) {
+            try {
+                connection.rollback();
+            } catch (SQLException rollbackFailure) {
+                ex.addSuppressed(rollbackFailure);
+            }
+            throw ex;
+        }
+    }
+
+    private record LegacyWeightKey(String weight, LocalDateTime date) {}
+    
     private String getConnectionString() throws FileNotFoundException {
 
         return getStorageType(StorageService::getPrivateStorage)
-                .map(path -> "jdbc:h2:" + path + File.separatorChar + "weightconverter")
+                .map(path -> "jdbc:h2:" + new File(path, "weightconverter").getAbsolutePath())
                 .orElseThrow(() -> new FileNotFoundException("Could not access private storage."));
     }
 
@@ -179,6 +261,8 @@ public class Database {
 
     public void setWeight(String weight, double kilos, LocalDateTime dtTm) {
 
+        LOG.log(Level.INFO, "Inserting {0}", new Object[]{weight});
+
         String insertWeight
                 = """
         INSERT INTO WEIGHTCONVERTER.WEIGHT
@@ -220,7 +304,19 @@ public class Database {
         }
     }
 
-    private static <T> T getStorageType(Function<StorageService, T> storageService) {
-        return Services.get(StorageService.class).map(storageService::apply).orElse(null);
+    private static <T> Optional<T> getStorageType(Function<StorageService, Optional<T>> storageService) {
+        return Services.get(StorageService.class).flatMap(storageService);
     }
+
+    public static class Factory {
+
+        private Factory() {
+        }
+
+        public static Database create() {
+
+            return Optional.ofNullable(INSTANCE).orElseGet(() -> INSTANCE = new Database());
+        }
+    }
+
 }

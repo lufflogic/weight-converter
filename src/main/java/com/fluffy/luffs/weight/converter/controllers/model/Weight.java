@@ -25,16 +25,11 @@ SOFTWARE.
 package com.fluffy.luffs.weight.converter.controllers.model;
 
 import com.fluffy.luffs.weight.converter.controllers.Formula;
-import java.util.regex.Pattern;
+import com.fluffy.luffs.weight.converter.i18n.I18n;
 
 /** Weight */
 public enum Weight {
-  KG("Kilograms") {
-    @Override
-    public Pattern getCompilePattern() {
-      return Pattern.compile("-?((\\d{0,3})|(\\d+\\.\\d{0,2}))");
-    }
-
+  KG("unit.kilograms") {
     @Override
     public String getFormulaResult(String value) {
       return Formula.create().kilosToStones(Double.parseDouble(value));
@@ -50,12 +45,7 @@ public enum Weight {
       return Double.parseDouble(value);
     }
   },
-  LBS("Pounds") {
-    @Override
-    public Pattern getCompilePattern() {
-      return Pattern.compile("-?(\\d{0,3})");
-    }
-
+  LBS("unit.pounds") {
     @Override
     public String getFormulaResult(String value) {
       return Formula.create().poundsToStones(Double.parseDouble(value));
@@ -69,12 +59,28 @@ public enum Weight {
     public double getKilos(String value) {
       return Formula.create().kilos(Double.parseDouble(value));
     }
+  },
+  STONES("unit.stones"){
+      @Override
+      public String getFormulaResult(String value) {
+          throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+      }
+
+      @Override
+      public String convertInput(String value) {
+          throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+      }
+
+      @Override
+      public double getKilos(String value) {
+          throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+      }
   };
 
-  private final String fullName;
+  private final String nameKey;
 
-  private Weight(String fullName) {
-    this.fullName = fullName;
+  private Weight(String nameKey) {
+    this.nameKey = nameKey;
   }
 
   /**
@@ -83,15 +89,8 @@ public enum Weight {
    * @return String
    */
   public String getFullName() {
-    return fullName;
+    return I18n.text(nameKey);
   }
-
-  /**
-   * Gets the accepted characters regex compilation.
-   *
-   * @return {@link Pattern}
-   */
-  public abstract Pattern getCompilePattern();
 
   /**
    * Gets the string representation of the calculated result.

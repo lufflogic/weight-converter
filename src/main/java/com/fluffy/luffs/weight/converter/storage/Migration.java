@@ -21,97 +21,93 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
  */
-
 package com.fluffy.luffs.weight.converter.storage;
 
 import com.fluffy.luffs.weight.converter.controllers.model.PastWeight;
-import com.gluonhq.attach.settings.SettingsService;
+import com.fluffy.luffs.weight.converter.controllers.model.WeightConverterException;
 import com.gluonhq.attach.storage.StorageService;
-import com.gluonhq.attach.util.Services;
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.text.MessageFormat;
 import java.time.Instant;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.tmatesoft.sqljet.core.SqlJetException;
-import org.tmatesoft.sqljet.core.SqlJetTransactionMode;
 import org.tmatesoft.sqljet.core.table.ISqlJetCursor;
-import org.tmatesoft.sqljet.core.table.ISqlJetTable;
 import org.tmatesoft.sqljet.core.table.SqlJetDb;
 
-/**
- * Migration
- *
- * @author Chris
- */
+/** Imports the legacy SQLite database while preserving the original file. */
 public class Migration {
 
-  public void doMigration() {
-    try {
-      File databaseFile = getDatabaseFile();
-      System.out.println(MessageFormat.format("Reading from {0}", databaseFile.toString()));
-      getLegacyWeights(databaseFile).stream()
-          .forEachOrdered(
-              weight ->
-                  new Database()
-                      .setWeight(weight.getWeight(), weight.getKilos(), weight.getDate()));
-      SettingsService.create().ifPresent(service -> service.store("migration", "1"));
-      databaseFile.deleteOnExit();
-    } catch (FileNotFoundException ex) {
-      Logger.getLogger(Database.class.getName()).log(Level.SEVERE, null, ex);
+    private static final Logger LOG = Logger.getLogger(Migration.class.getName());
+    private static final Pattern LEGACY_WEIGHT = Pattern.compile(
+            "(-?\\d+)st\\s+(-?\\d+)lbs?\\s+(-?\\d+)oz");
+
+    public void doMigration() {
+        try {
+            File directory = StorageService.create()
+                    .flatMap(StorageService::getPrivateStorage)
+                    .orElseThrow(() -> new WeightConverterException("Could not access private storage for migration."));
+            File databaseFile = new File(directory, "weightconverter.sqlite");
+            if (!databaseFile.exists()) {
+                return;
+            }
+            if (!databaseFile.isFile()) {
+                throw new WeightConverterException("Legacy database is not a file: " + databaseFile);
+            }
+            Database.Factory.create().migrateLegacyWeights(() -> getLegacyWeights(databaseFile));
+        } catch (WeightConverterException ex) {
+            LOG.log(Level.SEVERE, "Legacy migration failed; the source is retained for retry.", ex);
+        }
     }
-  }
 
-  private File getDatabaseFile() throws FileNotFoundException {
-
-    Optional<File> storageLocation =
-        Services.get(StorageService.class).map(StorageService::getPrivateStorage).orElse(null);
-
-    return new File(
-        storageLocation
-                .orElseThrow(() -> new FileNotFoundException("Could not access private storage."))
-                .getAbsolutePath()
-            + "/weightconverter.sqlite");
-  }
-
-  private List<PastWeight> getLegacyWeights(File dbFile) {
-    List<PastWeight> results = new ArrayList<>();
-
-    try {
-      SqlJetDb connection = SqlJetDb.open(dbFile, true);
-      connection.runTransaction(
-          (SqlJetDb db) -> {
-            db.getOptions().setUserVersion(1);
-            return true;
-          },
-          SqlJetTransactionMode.WRITE);
-
-      connection.beginTransaction(SqlJetTransactionMode.READ_ONLY);
-      ISqlJetTable weightISqlJetTable = connection.getTable("weight");
-      ISqlJetCursor wieghtTablJetCursor = weightISqlJetTable.order("dt_tm_idx");
-      if (!wieghtTablJetCursor.eof()) {
-        do {
-          results.add(
-              new PastWeight(
-                  wieghtTablJetCursor.getInteger("id"),
-                  wieghtTablJetCursor.getString("weight"),
-                  0.0,
-                  LocalDateTime.ofInstant(
-                      Instant.ofEpochSecond(wieghtTablJetCursor.getInteger("dt_tm")),
-                      ZoneId.systemDefault())));
-        } while (wieghtTablJetCursor.next());
-      }
-      wieghtTablJetCursor.close();
-      connection.close();
-    } catch (SqlJetException ex) {
-      Logger.getLogger(Database.class.getName()).log(Level.SEVERE, null, ex);
+    static List<PastWeight> getLegacyWeights(File dbFile) {
+        List<PastWeight> results = new ArrayList<>();
+        try {
+            SqlJetDb connection = SqlJetDb.open(dbFile, false);
+            try {
+                connection.runReadTransaction(db -> {
+                    ISqlJetCursor cursor = db.getTable("weight").open();
+                    try {
+                        while (!cursor.eof()) {
+                            String weight = cursor.getString("weight");
+                            results.add(new PastWeight(cursor.getInteger("id"), weight,
+                                    kilosFromLegacyWeight(weight),
+                                    // The legacy writer encoded local wall time using UTC.
+                                    LocalDateTime.ofInstant(Instant.ofEpochSecond(cursor.getInteger("dt_tm")),
+                                            ZoneOffset.UTC)));
+                            cursor.next();
+                        }
+                    } finally {
+                        cursor.close();
+                    }
+                    return null;
+                });
+            } finally {
+                connection.close();
+            }
+        } catch (SqlJetException | RuntimeException ex) {
+            throw new WeightConverterException("Could not read legacy database: " + dbFile, ex);
+        }
+        return results;
     }
-    return results;
-  }
+
+    private static double kilosFromLegacyWeight(String weight) {
+        Matcher matcher = LEGACY_WEIGHT.matcher(weight);
+        if (!matcher.matches()) {
+            throw new WeightConverterException("Unrecognized legacy weight: " + weight);
+        }
+        double pounds = Double.parseDouble(matcher.group(1)) * 14
+                + Double.parseDouble(matcher.group(2))
+                + Double.parseDouble(matcher.group(3)) / 16;
+        if (!Double.isFinite(pounds)) {
+            throw new WeightConverterException("Legacy weight is out of range: " + weight);
+        }
+        // The legacy file only stores rounded stones/pounds/ounces, so this is approximate.
+        return pounds * 0.45359237;
+    }
 }

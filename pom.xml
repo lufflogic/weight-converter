@@ -23,17 +23,17 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <mainClass>com.fluffy.luffs.weight.converter.WeightConverter</mainClass>
-        <javafx.version>23.0.1</javafx.version>
-        <gluon.attach>4.0.21</gluon.attach>
-        <graalVMVersion>23+25.1-dev</graalVMVersion>
-        <ios.release.providedSigningIdentity />
-        <ios.release.providedProvisioningProfile />
+        <javafx.version>17.0.19</javafx.version>
+        <gluon.attach>4.0.25</gluon.attach>
+        <graalVMVersion>22.1.0.1-Final</graalVMVersion>
+        <release.providedSigningIdentity />
+        <release.providedProvisioningProfile />
     </properties>
     
     <scm>
         <connection>scm:git:https://github.com/cbm64chris/${project.artifactId}.git</connection>
         <developerConnection>scm:git:https://github.com/cbm64chris/${project.artifactId}.git</developerConnection>
-        <tag>HEAD</tag>
+        <tag>1.2.0</tag>
         <url>https://github.com/cbm64chris/${project.artifactId}</url>
     </scm>
     
@@ -51,16 +51,21 @@
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>3.2.5</version>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.13.0</version>
+                <version>3.14.0</version>
                 <configuration>
-                    <release>23</release>
+                    <release>17</release>
                 </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-release-plugin</artifactId>
-                <version>3.0.1</version>
+                <version>3.1.1</version>
                 <configuration>
                     <pushChanges>false</pushChanges>
                     <tagNameFormat>${project.version}</tagNameFormat>
@@ -69,8 +74,17 @@
             <plugin>
                 <groupId>com.gluonhq</groupId>
                 <artifactId>gluonfx-maven-plugin</artifactId>
-                <version>1.0.25-SNASPSHOT</version>                
+                <version>1.0.29</version>                
                 <configuration>
+                    <bundlesList>
+                        <list>i18n.Messages</list>
+                    </bundlesList>
+                    <resourcesList>
+                        <list>i18n/.*[.]properties$</list>
+                    </resourcesList>
+                    <nativeImageArgs>
+                        <arg>-H:IncludeLocales=en,fr,de,es</arg>
+                    </nativeImageArgs>
                     <reflectionList>
                         <list>com.fluffy.luffs.weight.converter.controllers.WeightConverterController</list>
                         <list>javafx.geometry.Insets</list>
@@ -92,18 +106,22 @@
                         <list>display</list>
                         <list>lifecycle</list>
                         <list>settings</list>
+                        <list>keyboard</list>
                     </attachList>
                     
                     <target>${build.target}</target>
-                    <graalvmHome>//Library/Java/JavaVirtualMachines/graalvm-java23-darwin-aarch64-gluon-${graalVMVersion}/Contents/Home</graalvmHome>
+                    <graalvmHome>//Library/Java/JavaVirtualMachines/graalvm-svm-java17-darwin-m1-gluon-${graalVMVersion}/Contents/Home</graalvmHome>
                     <mainClass>${mainClass}</mainClass>
                     
                     <releaseConfiguration>      
                         <bundleName>WeightConverter</bundleName>
                         <bundleVersion>${project.version}</bundleVersion>
                         <bundleShortVersion>${project.version}</bundleShortVersion>
-                        <providedSigningIdentity>${ios.release.providedSigningIdentity}</providedSigningIdentity>
-                        <providedProvisioningProfile>${ios.release.providedProvisioningProfile}</providedProvisioningProfile>
+                        <macAppStore>true</macAppStore>
+                        <macSigningUserName>chrislluff@me.com</macSigningUserName>
+                        <macAppCategory>public.app-category.healthcare-fitness</macAppCategory>
+                        <providedSigningIdentity>${release.providedSigningIdentity}</providedSigningIdentity>
+                        <providedProvisioningProfile>${release.providedProvisioningProfile}</providedProvisioningProfile>
                     </releaseConfiguration>
 
                     <verbose>true</verbose>
@@ -168,6 +186,17 @@
     
     <dependencies>
         <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <version>5.10.2</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.gluonhq.attach</groupId>
+            <artifactId>keyboard</artifactId>
+            <version>${gluon.attach}</version>
+        </dependency>
+        <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-base</artifactId>
             <version>${javafx.version}</version>
@@ -228,7 +257,7 @@
         <dependency>
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
-            <version>2.1.214</version>
+            <version>2.2.224</version>
         </dependency>
         <dependency>
             <groupId>org.tmatesoft.sqljet</groupId>
@@ -257,7 +286,7 @@
             <properties>
                 <attach.classifier>ios</attach.classifier>
                 <build.target>ios-sim</build.target>
-                <simulatorDevice>iPhone 16 Pro Max</simulatorDevice>
+                <simulatorDevice>iPhone 17 Pro Max</simulatorDevice>
             </properties>
         </profile>
         <profile>
@@ -274,7 +303,11 @@
     
     <repositories>
         <repository>
-            <id>Gluon</id>
+            <id>gluon-snapshots</id>
+            <url>https://nexus.gluonhq.com/nexus/content/repositories/public-snapshots</url>
+        </repository>
+        <repository>
+            <id>gluon-releases</id>
             <url>https://nexus.gluonhq.com/nexus/content/repositories/releases</url>
         </repository>
     </repositories>
@@ -282,7 +315,14 @@
     <pluginRepositories>
         <pluginRepository>
             <id>gluon-releases</id>
-            <url>http://nexus.gluonhq.com/nexus/content/repositories/releases/</url>
+            <url>https://nexus.gluonhq.com/nexus/content/repositories/releases</url>
+        </pluginRepository>
+        <pluginRepository>
+            <id>Gluon Snapshots</id>
+            <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
+            <snapshots>
+                <updatePolicy>always</updatePolicy>
+            </snapshots>
         </pluginRepository>
     </pluginRepositories>
     

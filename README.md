@@ -37,3 +37,19 @@ If you wish to bake the run command into [Apache NetBeans](https://netbeans.apac
 ```
 
 Compilation for iOS requires additional steps to provision an iOS device for installation. I recommend reading the excellent tutorial on [Gluon's own site](https://docs.gluonhq.com/client/#_overview).
+
+## Translations
+
+User-facing text lives in `src/main/resources/i18n/Messages*.properties`:
+
+- `Messages.properties`: British English fallback.
+- `Messages_en.properties`: English.
+- `Messages_fr.properties`: French.
+- `Messages_de.properties`: German.
+- `Messages_es.properties`: Spanish.
+
+The app uses the system locale, with British English for unsupported languages. Restart the app after changing the system language. Use `I18n.text("key", arguments...)` for new UI strings and add each key to every bundle. Message placeholders use `{0}`, `{1}`, etc.; double apostrophes in messages with placeholders (MessageFormat syntax).
+
+Dates follow the locale, and decimal-comma input is accepted in French, German and Spanish. Stored weight text remains in the original `st/lb/oz` format; translations are applied only for display. Diagnostic log messages remain in English.
+
+Native resource bundles and locale data are registered in `pom.xml` and `META-INF/native-image/resource-config.json`; iOS languages are declared in `src/ios/Default-Info.plist`. Update those lists when adding a language. Run translation and regression tests with `mvn -Pdesktop test`.
